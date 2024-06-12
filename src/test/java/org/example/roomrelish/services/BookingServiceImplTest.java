@@ -31,10 +31,10 @@ public class BookingServiceImplTest {
     private BookingRepository bookingRepository;
 
     @Mock
-    private BookingServiceImpl bookingServiceImpl;
+    private BookingService bookingServiceImpl;
 
     @InjectMocks
-    private BookingServiceImpl bookingService;
+    private BookingService bookingService;
 
     @BeforeEach
     public void setUp() {

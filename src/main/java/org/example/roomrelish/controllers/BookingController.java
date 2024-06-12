@@ -9,7 +9,7 @@ import org.example.roomrelish.ExceptionHandler.CustomMongoSocketException;
 import org.example.roomrelish.ExceptionHandler.GlobalExceptionHandler;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.Booking;
-import org.example.roomrelish.services.BookingServiceImpl;
+import org.example.roomrelish.services.BookingService;
 import org.jetbrains.annotations.TestOnly;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookingController {
     GlobalExceptionHandler globalExceptionHandler;
 
-    private final BookingServiceImpl bookingService;
+    private final BookingService bookingService;
     @Operation(
             description = "Booking Room",
             summary = "Adds a Booking document in DB with the given details",
@@ -40,30 +40,8 @@ public class BookingController {
             }
     )
     @PostMapping("/bookingDetails")
-    public ResponseEntity<?> bookingDetails(@RequestBody BookingDetailsDTO bookingDetailsDTO){
-        try{
-            Booking bookingDetails = bookingService.bookRoom(bookingDetailsDTO);
-            return ResponseEntity.ok(bookingDetails);
-        }
-        catch(NullPointerException e){
-            return ResponseEntity.status(500).body(e.getMessage());
-        }
-        catch (IllegalArgumentException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-        catch (CustomDuplicateBookingException customDuplicateKeyException){
-            return globalExceptionHandler.handleCustomDuplicateException(customDuplicateKeyException);
-        }
-        catch(CustomDataAccessException customDataAccessException){
-            return globalExceptionHandler.handleCustomDataAccessException(customDataAccessException);
-        }
-        catch(CustomMongoSocketException customMongoSocketException){
-            return globalExceptionHandler.handleMongoSocketException(customMongoSocketException);
-        }
+    public ResponseEntity<?> bookingDetails(@RequestBody BookingDetailsDTO bookingDetailsDTO) throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException {
+        Booking bookingDetails = bookingService.bookRoom(bookingDetailsDTO);
+        return ResponseEntity.ok(bookingDetails);
     }
-
-
-
-
-
 }
