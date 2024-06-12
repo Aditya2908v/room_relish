@@ -3,9 +3,7 @@ package org.example.roomrelish.services;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoSocketException;
 import lombok.RequiredArgsConstructor;
-import org.example.roomrelish.ExceptionHandler.CustomDataAccessException;
-import org.example.roomrelish.ExceptionHandler.CustomDuplicateBookingException;
-import org.example.roomrelish.ExceptionHandler.CustomMongoSocketException;
+import org.example.roomrelish.ExceptionHandler.*;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.Booking;
 import org.example.roomrelish.models.Hotel;
@@ -28,13 +26,13 @@ public class BookingServiceImpl {
 
 
 
-    public Booking bookRoom(BookingDetailsDTO bookingDetailsDTO) throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException {
+    public Booking bookRoom(BookingDetailsDTO bookingDetailsDTO) throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
         if(bookingDetailsDTO==null){
-            throw new NullPointerException("No details provided");
+            throw new CustomNoBookingDetailsException("No details provided");
         }
         Optional<Hotel> hotelOptional = hotelRepository.findByHotelByIdAndRoomById(bookingDetailsDTO.get_hotelId(),bookingDetailsDTO.get_roomId());
         if (hotelOptional.isEmpty()) {
-            throw new IllegalArgumentException("Hotel Not Found");
+            throw new CustomNoHotelFoundException("Hotel Not Found");
         }
         Hotel currentHotel = hotelOptional.get();
 

@@ -3,10 +3,7 @@ package org.example.roomrelish.controllers;
 import com.flextrade.jfixture.FixtureAnnotations;
 import com.flextrade.jfixture.annotations.Fixture;
 import com.mongodb.DuplicateKeyException;
-import org.example.roomrelish.ExceptionHandler.CustomDataAccessException;
-import org.example.roomrelish.ExceptionHandler.CustomDuplicateBookingException;
-import org.example.roomrelish.ExceptionHandler.CustomMongoSocketException;
-import org.example.roomrelish.ExceptionHandler.GlobalExceptionHandler;
+import org.example.roomrelish.ExceptionHandler.*;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.Booking;
 import org.example.roomrelish.services.BookingServiceImpl;
@@ -48,7 +45,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    void testBookingDetails_success() throws CustomDuplicateBookingException, CustomDataAccessException, CustomMongoSocketException {
+    void testBookingDetails_success() throws CustomDuplicateBookingException, CustomDataAccessException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
         //Arrange
        Booking booking1 = createBookingFixture(bookingDetailsDTO,booking);
         when(bookingServiceImpl.bookRoom(bookingDetailsDTO)).thenReturn(booking);
@@ -82,7 +79,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    void testBookingDetails_NullPointerException() throws CustomDuplicateBookingException, CustomDataAccessException, CustomMongoSocketException {
+    void testBookingDetails_NullPointerException() throws CustomDuplicateBookingException, CustomDataAccessException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
         String errorMessage = "Null pointer exception occurred";
         when(bookingServiceImpl.bookRoom(null)).thenThrow(new NullPointerException("Null pointer exception occurred"));
 
@@ -94,7 +91,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    void testBookingDetails_IllegalArgumentException()throws CustomDuplicateBookingException, CustomDataAccessException,CustomMongoSocketException{
+    void testBookingDetails_IllegalArgumentException() throws CustomDuplicateBookingException, CustomDataAccessException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
         String errorMessage = "Hotel or Room not found";
         BookingDetailsDTO bookingDetailsDTO = createBookingDetailsDTO();
         when(bookingServiceImpl.bookRoom(bookingDetailsDTO)).thenThrow(new IllegalArgumentException("Hotel or Room not found"));

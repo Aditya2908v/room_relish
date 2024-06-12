@@ -3,10 +3,7 @@ package org.example.roomrelish.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.example.roomrelish.ExceptionHandler.CustomDataAccessException;
-import org.example.roomrelish.ExceptionHandler.CustomDuplicateBookingException;
-import org.example.roomrelish.ExceptionHandler.CustomMongoSocketException;
-import org.example.roomrelish.ExceptionHandler.GlobalExceptionHandler;
+import org.example.roomrelish.ExceptionHandler.*;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.Booking;
 import org.example.roomrelish.services.BookingServiceImpl;
@@ -45,11 +42,11 @@ public class BookingController {
             Booking bookingDetails = bookingService.bookRoom(bookingDetailsDTO);
             return ResponseEntity.ok(bookingDetails);
         }
-        catch(NullPointerException e){
-            return ResponseEntity.status(500).body(e.getMessage());
+        catch(CustomNoBookingDetailsException e){
+            return globalExceptionHandler.handleCustomNoBookingDetailsException(e);
         }
-        catch (IllegalArgumentException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+        catch (CustomNoHotelFoundException e){
+            return globalExceptionHandler.handleCustomNoHotelFoundException(e);
         }
         catch (CustomDuplicateBookingException customDuplicateKeyException){
             return globalExceptionHandler.handleCustomDuplicateException(customDuplicateKeyException);

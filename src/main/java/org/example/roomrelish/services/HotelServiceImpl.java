@@ -149,7 +149,7 @@ public class HotelServiceImpl implements HotelService {
             List<Hotel> filteredHotels = hotelRepository.findByLocationCityName(cityName);
             filteredHotels = filteringHotelsByAmenities(filteredHotels,amenities);
 
-        //filteredHotels = filteringHotelsByPriceRange(filteredHotels,priceRangeMax,priceRangeMin);
+            //filteredHotels = filteringHotelsByPriceRange(filteredHotels,priceRangeMax,priceRangeMin);
 
             filteredHotels = filteringHotelsByRating(filteredHotels,rating);
 

@@ -1,8 +1,6 @@
 package org.example.roomrelish.services;
 
-import org.example.roomrelish.ExceptionHandler.CustomDataAccessException;
-import org.example.roomrelish.ExceptionHandler.CustomDuplicateBookingException;
-import org.example.roomrelish.ExceptionHandler.CustomMongoSocketException;
+import org.example.roomrelish.ExceptionHandler.*;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.*;
 import org.example.roomrelish.repository.BookingRepository;
@@ -104,7 +102,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void bookRoom_NullPointException() throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException {
+    public void bookRoom_NullPointException() throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
         String errorMessage = "No details provided";
         when(bookingServiceImpl.bookRoom(null)).thenThrow(new NullPointerException("No details provided"));
 
@@ -112,13 +110,13 @@ public class BookingServiceImplTest {
             bookingService.bookRoom(null);
             fail("Expected an exception but none thrown");
         }
-        catch(NullPointerException e){
+        catch(NullPointerException | CustomNoHotelFoundException e){
             assertEquals(errorMessage, e.getMessage());
         }
     }
 
     @Test
-    public void bookRoom_HotelIllegalArgException() throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException {
+    public void bookRoom_HotelIllegalArgException() throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
         String errorMessage = "Hotel Not Found";
         BookingDetailsDTO bookingDetailsDTO = createBookingDetailsDTO();
         when(bookingServiceImpl.bookRoom(bookingDetailsDTO)).thenThrow(new IllegalArgumentException("Hotel Not Found"));
@@ -127,7 +125,7 @@ public class BookingServiceImplTest {
             bookingService.bookRoom(bookingDetailsDTO);
             fail("Expected an exception but none thrown");
         }
-        catch(IllegalArgumentException e){
+        catch(IllegalArgumentException | CustomNoBookingDetailsException e){
             assertEquals(errorMessage, e.getMessage());
         }
     }
