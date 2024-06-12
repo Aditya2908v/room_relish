@@ -11,6 +11,6 @@ public class RoomSelection {
         }
       else {
           return new DeluxeRoom();
-                }
+      }
     }
 }

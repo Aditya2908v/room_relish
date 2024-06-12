@@ -6,7 +6,7 @@ import com.mongodb.DuplicateKeyException;
 import org.example.roomrelish.ExceptionHandler.*;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.Booking;
-import org.example.roomrelish.services.BookingServiceImpl;
+import org.example.roomrelish.services.BookingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -25,11 +25,8 @@ import static org.mockito.Mockito.*;
 
 
 public class BookingControllerTest {
-
-
-
     @Mock
-    private BookingServiceImpl bookingServiceImpl;
+    private BookingService bookingServiceImpl;
     @Mock
     private GlobalExceptionHandler globalExceptionHandler;
     @Fixture
@@ -111,6 +108,8 @@ public class BookingControllerTest {
         }
         catch(DuplicateKeyException e){
             assertEquals(errorMessage, e.getMessage());
+        } catch (CustomDataAccessException | CustomDuplicateBookingException | CustomMongoSocketException e) {
+            throw new RuntimeException(e);
         }
     }
 
