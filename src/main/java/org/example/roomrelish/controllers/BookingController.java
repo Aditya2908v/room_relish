@@ -3,9 +3,11 @@ package org.example.roomrelish.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.roomrelish.ExceptionHandler.*;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.Booking;
-import org.example.roomrelish.services.BookingService;
+import org.example.roomrelish.services.BookingServiceImpl;
+import org.jetbrains.annotations.TestOnly;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,10 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/booking")
+@TestOnly
 public class BookingController {
+    GlobalExceptionHandler globalExceptionHandler;
 
-    private final BookingService bookingService;
-
+    private final BookingServiceImpl bookingService;
     @Operation(
             description = "Booking Room",
             summary = "Adds a Booking document in DB with the given details",
@@ -33,9 +36,31 @@ public class BookingController {
                     )
             }
     )
-    @PostMapping("/book-room")
-    public ResponseEntity<Booking> bookingDetails(@RequestBody BookingDetailsDTO bookingDetailsDTO) {
-        Booking bookingDetails = bookingService.bookRoom(bookingDetailsDTO);
-        return ResponseEntity.ok(bookingDetails);
+    @PostMapping("/bookingDetails")
+    public ResponseEntity<?> bookingDetails(@RequestBody BookingDetailsDTO bookingDetailsDTO){
+        try{
+            Booking bookingDetails = bookingService.bookRoom(bookingDetailsDTO);
+            return ResponseEntity.ok(bookingDetails);
+        }
+        catch(CustomNoBookingDetailsException e){
+            return globalExceptionHandler.handleCustomNoBookingDetailsException(e);
+        }
+        catch (CustomNoHotelFoundException e){
+            return globalExceptionHandler.handleCustomNoHotelFoundException(e);
+        }
+        catch (CustomDuplicateBookingException customDuplicateKeyException){
+            return globalExceptionHandler.handleCustomDuplicateException(customDuplicateKeyException);
+        }
+        catch(CustomDataAccessException customDataAccessException){
+            return globalExceptionHandler.handleCustomDataAccessException(customDataAccessException);
+        }
+        catch(CustomMongoSocketException customMongoSocketException){
+            return globalExceptionHandler.handleMongoSocketException(customMongoSocketException);
+        }
     }
+
+
+
+
+
 }
