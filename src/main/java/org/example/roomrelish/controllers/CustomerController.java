@@ -10,7 +10,6 @@ import org.example.roomrelish.models.Hotel;
 import org.example.roomrelish.services.AuthService;
 import org.example.roomrelish.services.CustomerService;
 import org.example.roomrelish.services.JwtService;
-import org.jetbrains.annotations.TestOnly;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,17 +25,19 @@ public class CustomerController {
     private final CustomerService customerService;
     private final AuthService authService;
     private final JwtService jwtService;
-    String errorMessageCustomer = "Customer not found";
 
+    @GetMapping("/hello")
+    public String getMessage(){
+        return "hello world";
+    }
 
     @QueryMapping("users")
-    @TestOnly
     public List<Customer> getAllCustomersGraphQL() {
         return customerService.getAllCustomers();
     }
 
     @GetMapping("/customers")
-    public ResponseEntity<?> getAllCustomers() {
+    public ResponseEntity<List<Customer>> getAllCustomers() {
         List<Customer> customers = customerService.getAllCustomers();
         return ResponseEntity.ok(customers);
     }
@@ -56,8 +57,7 @@ public class CustomerController {
             }
     )
     @PostMapping("/register")
-    public ResponseEntity<?> registerCustomer(@RequestBody RegisterUserDTO request) {
-        RegisterRequest registerRequest = authService.getRegisterRequest(request);
+    public ResponseEntity<AuthResponse> registerCustomer(@RequestBody RegisterRequest registerRequest) {
         AuthResponse response = authService.registerCustomer(registerRequest);
         return ResponseEntity.ok(response);
     }
@@ -77,16 +77,16 @@ public class CustomerController {
             }
     )
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         AuthResponse response = authService.authenticate(loginRequest);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/addCard")
-    public ResponseEntity<?> addCardToUser(@RequestBody CardDTO cardDTO, HttpServletRequest request) {
+    public ResponseEntity<String> addCardToUser(@RequestBody CardDTO cardDTO, HttpServletRequest request) {
         String userEmail = extractUserEmailFromRequest(request);
         customerService.addCardToUser(cardDTO, userEmail);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Card added successfully");
     }
 
     //update user
@@ -109,48 +109,20 @@ public class CustomerController {
             }
     )
     @PutMapping("/update")
-    public ResponseEntity<?> updateUser(@RequestBody UpdateCustomerDTO updateCustomerDTO, HttpServletRequest request) {
+    public ResponseEntity<String> updateUser(@RequestBody UpdateCustomerDTO updateCustomerDTO, HttpServletRequest request) {
         String userEmail = extractUserEmailFromRequest(request);
-        if (customerService.updateCustomer(userEmail, updateCustomerDTO)) {
-            return ResponseEntity.ok().body("Customer successfully updated");
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessageCustomer);
+        customerService.updateCustomer(userEmail, updateCustomerDTO);
+        return ResponseEntity.ok("Customer Details Updated Successfully");
     }
 
-    //specifically for navbar/ to check weather the user is logged in
-    @GetMapping("/navbar")
-    public ResponseEntity<?> getNavbarDetails(HttpServletRequest request) {
-        String userEmail = extractUserEmailFromRequest(request);
-        if (userEmail == null || userEmail.isEmpty()) {
-            return ResponseEntity.ok().body(new NavbarResponse(false, null));
-        }
-        CustomerProfile customerProfile = customerService.getProfileInfo(userEmail, "navbar");
-        if (customerProfile == null) {
-            return ResponseEntity.badRequest().body(errorMessageCustomer);
-        }
-        return ResponseEntity.ok().body(new NavbarResponse(true, customerProfile));
-    }
-
-    //get profile details for profile page
     @GetMapping("/profile-details")
-    public ResponseEntity<?> getProfileDetails(HttpServletRequest request) {
+    public ResponseEntity<CustomerProfile> getProfileDetails(HttpServletRequest request) {
         String userEmail = extractUserEmailFromRequest(request);
-        CustomerProfile customerProfile = customerService.getProfileInfo(userEmail, "profile");
-        if (customerProfile == null) {
-            return ResponseEntity.badRequest().body(errorMessageCustomer);
-        }
+        CustomerProfile customerProfile = customerService.getProfileInfo(userEmail);
         return ResponseEntity.ok().body(customerProfile);
     }
 
-    //get profile picture
-    @GetMapping("/profilePicture")
-    public ResponseEntity<?> getProfilePicture(HttpServletRequest request) {
-        String userEmail = extractUserEmailFromRequest(request);
-        String profilePicture = customerService.getProfilePicture(userEmail);
-        return ResponseEntity.ok().body(profilePicture);
-    }
-
-    // add or update profile or cover picture
+    //TODO update this profile picture functionality
     @PostMapping("/addProfilePicture")
     public ResponseEntity<?> addOrUpdateProfilePhoto(@RequestParam("file") MultipartFile file, @RequestParam String type, HttpServletRequest request) {
         String userEmail = extractUserEmailFromRequest(request);
@@ -158,13 +130,21 @@ public class CustomerController {
         if (fileName == null || fileName.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid image format");
         }
-        boolean success = customerService.uploadImage(userEmail, type, fileName);
+        boolean success = customerService.uploadImage(userEmail, fileName);
         if (success) {
             return ResponseEntity.ok("Image uploaded successfully");
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the request");
         }
     }
+
+    @GetMapping("/profilePicture")
+    public ResponseEntity<?> getProfilePicture(HttpServletRequest request) {
+        String userEmail = extractUserEmailFromRequest(request);
+        String profilePicture = customerService.getProfilePicture(userEmail);
+        return ResponseEntity.ok().body(profilePicture);
+    }
+
 
     // to view list of favourite hotels
     @GetMapping("/favouriteHotels")
@@ -194,12 +174,13 @@ public class CustomerController {
 
     // recent searches
     @GetMapping("/recent")
-    public ResponseEntity<?> getRecentHotels(HttpServletRequest request) {
+    public ResponseEntity<List<Hotel>> getRecentHotels(HttpServletRequest request) {
         String userEmail = extractUserEmailFromRequest(request);
         List<Hotel> recentHotels = customerService.findRecentHotels(userEmail);
         return ResponseEntity.ok().body(recentHotels);
     }
 
+    //Util function
     public String extractUserEmailFromRequest(HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

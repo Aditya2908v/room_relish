@@ -41,8 +41,8 @@ type GuestReview {
 }
 
 type User {
-    id: String!
-    userName: String!
+    id: String
+    userName: String
     email: String
     googleId: String
     favouriteHotels: [String!]!

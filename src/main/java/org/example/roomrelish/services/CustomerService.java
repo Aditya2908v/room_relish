@@ -15,13 +15,13 @@ public interface CustomerService {
 
     List<Customer> getAllCustomers();
 
-    boolean updateCustomer(String userEmail, UpdateCustomerDTO updateCustomerDTO);
+    void updateCustomer(String userEmail, UpdateCustomerDTO updateCustomerDTO);
 
-    CustomerProfile getProfileInfo(String userEmail, String navbar);
+    CustomerProfile getProfileInfo(String userEmail);
 
     String getProfilePicture(String userEmail);
 
-    boolean uploadImage(String userEmail, String type, String fileName);
+    boolean uploadImage(String userEmail, String fileName);
 
     List<Hotel> getFavouriteHotels(String userEmail);
 

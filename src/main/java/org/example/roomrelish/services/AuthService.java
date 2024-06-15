@@ -1,11 +1,10 @@
 package org.example.roomrelish.services;
 
 import lombok.RequiredArgsConstructor;
+import org.example.roomrelish.ExceptionHandler.CustomerAlreadyExistsException;
 import org.example.roomrelish.dto.AuthResponse;
 import org.example.roomrelish.dto.LoginRequest;
 import org.example.roomrelish.dto.RegisterRequest;
-import org.example.roomrelish.dto.RegisterUserDTO;
-import org.example.roomrelish.mapper.RegisterUserMapper;
 import org.example.roomrelish.models.Customer;
 import org.example.roomrelish.models.Role;
 import org.example.roomrelish.models.Token;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +32,14 @@ public class AuthService  {
 
 
     public AuthResponse registerCustomer(RegisterRequest request) {
+        Optional<Customer> optionalCustomerByEmail = customerRepository.findByEmail(request.getEmail());
+        if (optionalCustomerByEmail.isPresent()) {
+            throw new CustomerAlreadyExistsException("Customer", "email", request.getEmail());
+        }
+        Optional<Customer> optionalCustomerByPhoneNumber = customerRepository.findByPhoneNumber(request.getPhoneNumber());
+        if (optionalCustomerByPhoneNumber.isPresent()) {
+            throw new CustomerAlreadyExistsException("Customer", "phone number", request.getPhoneNumber());
+        }
         Customer customer = new Customer();
         customer.setUsername(request.getUsername());
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -41,18 +49,15 @@ public class AuthService  {
         customer.setRegisteredAt(new Date());
         customer.setDateOfBirth(request.getDateOfBirth());
         customer.setRole(Role.USER);
-
         var savedUser = customerRepository.save(customer);
         var jwtToken = jwtService.generateToken(savedUser);
         saveUserToken(savedUser, jwtToken);
         return AuthResponse.builder()
+                .userId(savedUser.getId())
                 .token(jwtToken)
                 .build();
     }
 
-    public RegisterRequest getRegisterRequest(RegisterUserDTO registerUserDTO){
-        return RegisterUserMapper.INSTANCE.registerUserDTOToRegisterRequest(registerUserDTO);
-    }
 
     public AuthResponse authenticate(LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));

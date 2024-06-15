@@ -29,6 +29,7 @@ public interface HotelService {
                            int priceRangeMax,
                            int priceRangeMin,
                            double rating,
-                           List<String> amenities);
+                           List<String> amenities
+    );
 
 }

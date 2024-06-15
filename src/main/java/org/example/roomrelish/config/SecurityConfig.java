@@ -49,13 +49,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/v1/customer/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/customer/hello").hasAuthority("USER")
                         .requestMatchers(HttpMethod.POST,"/api/v1/customer/addCard").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/customer/customers").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/customer/customers").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/customer/customers").hasAuthority("USER")
                         .requestMatchers(HttpMethod.GET,"/api/v1/customer/navbar").hasAuthority("USER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/customer/profile-details").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/hotels/totalRooms").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/customer/favouriteHotels").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/customer/recent").hasAuthority("USER")
+
                         //Hotel Controller
                         .requestMatchers(HttpMethod.GET, "/api/v1/hotels/search").permitAll()
-                    .requestMatchers(HttpMethod.POST,"/api/v1/hotels").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/v1/hotels").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/hotels/totalRooms").permitAll()
 
                         //graphql
                         .requestMatchers("/graphql").permitAll()
