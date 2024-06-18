@@ -19,10 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/hotels")
+@RequestMapping("api/v1/hotel")
 @Tag(name = "Hotel Management")
 public class HotelController {
 
@@ -44,6 +43,15 @@ public class HotelController {
         return hotelService.findHotelById(id);
     }
 
+    @GetMapping("/hotels")
+    public List<Hotel> getAllHotels(){
+        return hotelService.getAllHotels();
+    }
+
+    @GetMapping("/hotels/{id}")
+    public Hotel getHotel(@PathVariable String id){
+        return hotelService.findHotelById(id);
+    }
     //search hotel
     @Operation(
             description = "Search Hotels",

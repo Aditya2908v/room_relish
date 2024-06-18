@@ -1,7 +1,6 @@
 package org.example.roomrelish.models;
 
 
-import org.jetbrains.annotations.TestOnly;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.AllArgsConstructor;
@@ -15,7 +14,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-@TestOnly
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,7 +23,6 @@ public class Customer implements UserDetails {
     private String id;
     private String username;
     private String email;
-    private String googleId;
     private List<String> favouriteHotels;
     private List<String> recentVisitsOfHotels;
     private List<Card> addedCards;
@@ -34,7 +31,6 @@ public class Customer implements UserDetails {
     private String address;
     private String phoneNumber;
     private String profilePicture;
-    private String coverPicture;
     private String password;
     private Role role;
     private Token token;
@@ -72,5 +68,9 @@ public class Customer implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public String getUserName(){
+        return this.username;
     }
 }

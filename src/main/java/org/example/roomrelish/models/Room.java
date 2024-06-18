@@ -20,6 +20,6 @@ public class Room {
     private String roomType;
     private String roomSpecification;
     private int roomRate;
-    private int roomCountBasic;
+    private int roomCount;
     private List<RoomAvailability> roomAvailabilityList;
 }

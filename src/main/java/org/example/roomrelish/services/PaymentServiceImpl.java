@@ -1,16 +1,10 @@
 package org.example.roomrelish.services;
 
-import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoSocketException;
 import lombok.RequiredArgsConstructor;
-import org.example.roomrelish.ExceptionHandler.CustomDataAccessException;
-import org.example.roomrelish.ExceptionHandler.CustomDuplicateBookingException;
-import org.example.roomrelish.ExceptionHandler.CustomMongoSocketException;
 import org.example.roomrelish.models.*;
 import org.example.roomrelish.repository.BookingRepository;
 import org.example.roomrelish.repository.HotelRepository;
 import org.example.roomrelish.repository.PaymentRepository;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,56 +14,44 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class PaymentServiceImpl implements PaymentService{
+public class PaymentServiceImpl implements PaymentService {
     private final BookingRepository bookingRepository;
     private final PaymentRepository paymentRepository;
     private final HotelRepository hotelRepository;
 
     @Override
-    public Payment confirmBook(String _bookingId) throws CustomDuplicateBookingException, CustomDataAccessException, CustomMongoSocketException {
+    public Payment confirmBook(String _bookingId) {
         Optional<Payment> paymentOptional = paymentRepository.findBy_bookingId(_bookingId);
-        if(paymentOptional.isEmpty()){
+        if (paymentOptional.isEmpty()) {
             throw new IllegalArgumentException();
         }
         Payment currentPayment = paymentOptional.get();
-        //Setting payment status to true
+        // Setting payment status to true
         currentPayment.setPaymentStatus(true);
-        Optional<Hotel> hotelOptional = hotelRepository.findByHotelByIdAndRoomById(currentPayment.get_hotelId(),currentPayment.get_roomId());
+        Optional<Hotel> hotelOptional = hotelRepository.findById(currentPayment.get_hotelId());
 
-        if (hotelOptional.isEmpty()){
+        if (hotelOptional.isEmpty()) {
             throw new IllegalArgumentException();
         }
         Hotel currentHotel = hotelOptional.get();
-        Room currentRoom= currentHotel.getRooms().stream()
+        Room currentRoom = currentHotel.getRooms().stream()
                 .filter(room -> room.getId().equals(currentPayment.get_roomId()))
-                .findFirst().orElseThrow(()->new IllegalArgumentException("Room not found"));
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("Room not found"));
 
         Optional<Booking> booking = bookingRepository.findById(_bookingId);
-        if(booking.isEmpty()){
+        if (booking.isEmpty()) {
             throw new IllegalArgumentException("No booking found");
         }
         Booking currentBooking = booking.get();
 
-        modifyRoomCountForConfirmBooking(currentRoom,currentBooking,currentHotel);
+        modifyRoomCountForConfirmBooking(currentRoom, currentBooking, currentHotel);
 
-        return savedPayment(currentHotel,currentPayment);
-
+        return saveBookingAndPayment(currentHotel, currentPayment);
     }
 
-    private Payment savedPayment(Hotel currentHotel, Payment currentPayment) throws CustomDuplicateBookingException, CustomDataAccessException, CustomMongoSocketException {
-        try{
-            hotelRepository.save(currentHotel);
-            return paymentRepository.save(currentPayment);
-        }
-        catch (DuplicateKeyException e) {
-            throw new CustomDuplicateBookingException(e);
-        }
-        catch (DataAccessException e){
-            throw new CustomDataAccessException(e);
-        }
-        catch (MongoSocketException e){
-            throw new CustomMongoSocketException(e);
-        }
+    private Payment saveBookingAndPayment(Hotel currentHotel, Payment currentPayment) {
+        hotelRepository.save(currentHotel);
+        return paymentRepository.save(currentPayment);
     }
 
     private void modifyRoomCountForConfirmBooking(Room currentRoom, Booking currentBooking, Hotel currentHotel) {
@@ -89,50 +71,44 @@ public class PaymentServiceImpl implements PaymentService{
     }
 
     @Override
-    public List<Payment> getMyBookings(String _userId){
+    public List<Payment> getMyBookings(String _userId) {
         return paymentRepository.findAllBy_userId(_userId);
     }
 
     @Override
-    public String deleteBooking(String _bookingId){
-       // System.out.println("Inside deleteBooking");
+    public String deleteBooking(String _bookingId) {
         double chargesAmount = 0.0;
         Optional<Payment> payment = paymentRepository.findBy_bookingId(_bookingId);
         Optional<Booking> booking = bookingRepository.findById(_bookingId);
-        if(payment.isEmpty()||booking.isEmpty()){
-            throw  new IllegalArgumentException("No booking found");
+        if (payment.isEmpty() || booking.isEmpty()) {
+            throw new IllegalArgumentException("No booking found");
         }
         Payment currentPayment = payment.get();
         Booking currentBooking = booking.get();
-        if(currentPayment.isPaymentStatus()){
-            Optional<Hotel> hotel = hotelRepository.findByHotelByIdAndRoomById(currentPayment.get_hotelId(),currentPayment.get_roomId());
-            Hotel currentHotel = new Hotel();
-            if(hotel.isPresent()){
-                currentHotel = hotel.get();
-            }
+        if (currentPayment.isPaymentStatus()) {
+            Optional<Hotel> hotel = hotelRepository.findById(currentPayment.get_hotelId());
+            Hotel currentHotel = hotel.orElseThrow(() -> new IllegalArgumentException("Hotel not found"));
 
             Room currentRoom = currentHotel.getRooms().stream()
                     .filter(room -> room.getId().equals(currentPayment.get_roomId()))
-                    .findFirst().orElseThrow(()->new IllegalArgumentException("No room found"));
-            modifyRoomCountForDeleteBooking(currentBooking,currentRoom,currentHotel);
+                    .findFirst().orElseThrow(() -> new IllegalArgumentException("No room found"));
+            modifyRoomCountForDeleteBooking(currentBooking, currentRoom, currentHotel);
             hotelRepository.save(currentHotel);
-            deleteBookingAndPayment(currentBooking,currentPayment);
+            deleteBookingAndPayment(currentBooking, currentPayment);
 
             LocalDate checkInDate = currentBooking.getCheckInDate();
             LocalDate todayDate = LocalDate.now();
-            int dayDifference = checkInDate.getDayOfMonth()-todayDate.getDayOfMonth();
-            if(dayDifference==0){
+            int dayDifference = checkInDate.getDayOfMonth() - todayDate.getDayOfMonth();
+            if (dayDifference == 0) {
                 chargesAmount = currentBooking.getTotalAmount();
-            } else if (dayDifference==1) {
-                chargesAmount=(50.0/100.0)*currentBooking.getTotalAmount();
+            } else if (dayDifference == 1) {
+                chargesAmount = (50.0 / 100.0) * currentBooking.getTotalAmount();
             }
-            return "Cancelled booking and the amount refunded will be "+(currentBooking.getTotalAmount()-chargesAmount);
-        }
-        else{
-            deleteBookingAndPayment(currentBooking,currentPayment);
+            return "Cancelled booking and the amount refunded will be " + (currentBooking.getTotalAmount() - chargesAmount);
+        } else {
+            deleteBookingAndPayment(currentBooking, currentPayment);
             return "Booking details deleted";
         }
-
     }
 
     private void deleteBookingAndPayment(Booking currentBooking, Payment currentPayment) {
@@ -146,5 +122,4 @@ public class PaymentServiceImpl implements PaymentService{
         currentRoom.setRoomAvailabilityList(availabilityList);
         currentHotel.setRooms(currentHotel.getRooms());
     }
-
 }

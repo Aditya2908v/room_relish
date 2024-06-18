@@ -20,14 +20,6 @@ import org.jetbrains.annotations.TestOnly;
 )
 public class UpdateCustomerDTO {
 
-    @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Email should be valid")
-    @Schema(
-            description = "User's updated email address",
-            example = "user@example.com"
-    )
-    private String email;
-
     @NotBlank(message = "Password cannot be blank")
     @Size(min = 6, message = "Password should have at least 6 characters")
     @Schema(

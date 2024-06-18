@@ -2,9 +2,7 @@ package org.example.roomrelish.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.example.roomrelish.ExceptionHandler.CustomDataAccessException;
-import org.example.roomrelish.ExceptionHandler.CustomDuplicateBookingException;
-import org.example.roomrelish.ExceptionHandler.CustomMongoSocketException;
+import lombok.RequiredArgsConstructor;
 import org.example.roomrelish.models.Payment;
 import org.example.roomrelish.services.PaymentServiceImpl;
 import org.springframework.http.ResponseEntity;
@@ -12,20 +10,17 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/payment")
+@RequiredArgsConstructor
 public class PaymentController {
 
         private final PaymentServiceImpl paymentService;
-
-        public PaymentController(PaymentServiceImpl paymentService) {
-                this.paymentService = paymentService;
-        }
 
         @Operation(description = "Confirm Payment process", summary = "After booking, this payment API confirms the booking by making a payment", responses = {
                 @ApiResponse(description = "Details of Payment", responseCode = "200"),
                 @ApiResponse(description = "No booking details found", responseCode = "204")
         })
         @PostMapping("/pay")
-        public ResponseEntity<?> confirmBooking(@RequestParam String bookingId) throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException {
+        public ResponseEntity<?> confirmBooking(@RequestParam String bookingId){
                 Payment paymentDetails = paymentService.confirmBook(bookingId);
                 return ResponseEntity.ok(paymentDetails);
         }
