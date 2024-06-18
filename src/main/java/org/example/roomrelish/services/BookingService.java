@@ -1,6 +1,7 @@
 package org.example.roomrelish.services;
 
 import lombok.RequiredArgsConstructor;
+import org.example.roomrelish.ExceptionHandler.CustomNoBookingDetailsException;
 import org.example.roomrelish.ExceptionHandler.ResourceNotFoundException;
 import org.example.roomrelish.ExceptionHandler.RoomUnavailableException;
 import org.example.roomrelish.constants.ApplicationConstants;
@@ -28,9 +29,9 @@ public class BookingService {
     private final CustomerRepository customerRepository;
     private final EmailService emailService;
 
-    public Booking bookRoom(BookingDetailsDTO bookingDetailsDTO) {
+    public Booking bookRoom(BookingDetailsDTO bookingDetailsDTO) throws CustomNoBookingDetailsException {
         if (bookingDetailsDTO == null)
-            throw new IllegalArgumentException("No details provided");
+            throw new CustomNoBookingDetailsException("No details provided");
 
         Hotel hotel = hotelRepository.findById(bookingDetailsDTO.get_hotelId())
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel", "hotel id", bookingDetailsDTO.get_hotelId()));
@@ -56,10 +57,10 @@ public class BookingService {
 
     private Payment createPayment(Booking booking, Room requiredRoom, Hotel hotel) {
         return Payment.builder()
-                ._bookingId(booking.getId())
-                ._userId(booking.get_userId())
-                ._hotelId(booking.get_hotelId())
-                ._roomId(booking.get_roomId())
+                .bookingId(booking.getId())
+                .userId(booking.getUserId())
+                .hotelId(booking.getHotelId())
+                .roomId(booking.getRoomId())
                 .hotelName(hotel.getHotelName())
                 .roomName(requiredRoom.getRoomType())
                 .numOfDays(booking.getNumOfDays())
@@ -76,9 +77,9 @@ public class BookingService {
         double totalAmount = bookingDetailsDTO.getCustomerRoomCount() * (double) bookingDetailsDTO.getCustomerDayCount() * requiredRoom.getRoomRate();
         double totalBill = totalAmount + totalAmount * ApplicationConstants.DEFAULT_GST_PERCENTAGE;
         return Booking.builder()
-                ._userId(bookingDetailsDTO.get_userId())
-                ._hotelId(bookingDetailsDTO.get_hotelId())
-                ._roomId(bookingDetailsDTO.get_roomId())
+                .userId(bookingDetailsDTO.get_userId())
+                .hotelId(bookingDetailsDTO.get_hotelId())
+                .roomId(bookingDetailsDTO.get_roomId())
                 .numOfRooms(bookingDetailsDTO.getCustomerRoomCount())
                 .numOfDays(bookingDetailsDTO.getCustomerDayCount())
                 .checkInDate(bookingDetailsDTO.getCheckInDate())

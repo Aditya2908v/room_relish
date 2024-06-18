@@ -11,5 +11,6 @@ import java.util.Optional;
 @Repository
 public interface PaymentRepository extends CrudRepository<Payment, String> {
     List<Payment> findAllBy_userId(String _userId);
-    Optional<Payment> findBy_bookingId(String _bookingId);
+
+    Optional<Payment> findByBookingId(String bookingId);
 }

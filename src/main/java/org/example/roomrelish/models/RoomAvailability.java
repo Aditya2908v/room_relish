@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
 
@@ -14,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class RoomAvailability {
-    private String _bookingId;
+    private String bookingId;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private int roomCount;
