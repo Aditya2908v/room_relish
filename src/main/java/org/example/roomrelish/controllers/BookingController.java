@@ -3,6 +3,7 @@ package org.example.roomrelish.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.roomrelish.ExceptionHandler.CustomNoBookingDetailsException;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.Booking;
 import org.example.roomrelish.services.BookingService;
@@ -34,7 +35,7 @@ public class BookingController {
             }
     )
     @PostMapping("/book-room")
-    public ResponseEntity<Booking> bookingDetails(@RequestBody BookingDetailsDTO bookingDetailsDTO) {
+    public ResponseEntity<Booking> bookingDetails(@RequestBody BookingDetailsDTO bookingDetailsDTO) throws CustomNoBookingDetailsException {
         Booking bookingDetails = bookingService.bookRoom(bookingDetailsDTO);
         return ResponseEntity.ok(bookingDetails);
     }

@@ -23,7 +23,7 @@ import org.jetbrains.annotations.TestOnly;
         ),
         servers = {
                 @Server(
-                        url = "http://localhost:8081",
+                        url = "http://localhost:8082",
                         description = "Local Development Server"
                 )
         },

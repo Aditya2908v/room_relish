@@ -10,7 +10,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @TestOnly
 @Data
@@ -21,13 +20,13 @@ import java.util.Date;
 public class Payment {
     @Id
     private String id;
-    private String _hotelId;
+    private String hotelId;
     private String hotelName;
     private String hotelImage;
-    private String _userId;
-    private String _roomId;
+    private String userId;
+    private String roomId;
     private String roomName;
-    private String _bookingId;
+    private String bookingId;
     private double totalAmount;
     private int numOfRooms;
     private int numOfDays;

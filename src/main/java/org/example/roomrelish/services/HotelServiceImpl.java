@@ -1,6 +1,7 @@
 package org.example.roomrelish.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.flogger.Flogger;
 import org.bson.types.ObjectId;
 import org.example.roomrelish.dto.*;
 import org.example.roomrelish.models.*;
@@ -175,7 +176,7 @@ public class HotelServiceImpl implements HotelService {
         SearchResultDTO searchResultDTO = new SearchResultDTO();
         searchResultDTO.setHotels(filteredHotels);
         searchResultDTO.setRoomIds(availableRoomIdsList);
-        System.out.println(availableRoomIdsList.size());
+
         return searchResultDTO;
     }
 
