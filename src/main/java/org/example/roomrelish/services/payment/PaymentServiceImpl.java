@@ -133,5 +133,6 @@ public class PaymentServiceImpl implements PaymentService {
         currentRoom.setRoomAvailabilityList(availabilityList);
         currentHotel.setRooms(currentHotel.getRooms());
         System.out.println();
+        System.out.println();
     }
 }
