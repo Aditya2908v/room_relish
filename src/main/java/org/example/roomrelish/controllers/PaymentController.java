@@ -3,12 +3,8 @@ package org.example.roomrelish.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.example.roomrelish.ExceptionHandler.CustomNoBookingFoundException;
-import org.example.roomrelish.ExceptionHandler.CustomNoHotelFoundException;
-import org.example.roomrelish.ExceptionHandler.CustomNoPaymentFoundException;
-import org.example.roomrelish.ExceptionHandler.CustomNoRoomFoundException;
 import org.example.roomrelish.models.Payment;
-import org.example.roomrelish.services.PaymentServiceImpl;
+import org.example.roomrelish.services.payment.PaymentServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +20,7 @@ public class PaymentController {
                 @ApiResponse(description = "No booking details found", responseCode = "204")
         })
         @PostMapping("/pay")
-        public ResponseEntity<?> confirmBooking(@RequestParam String bookingId) throws CustomNoHotelFoundException, CustomNoRoomFoundException, CustomNoBookingFoundException, CustomNoPaymentFoundException {
+        public ResponseEntity<?> confirmBooking(@RequestParam String bookingId){
                 Payment paymentDetails = paymentService.confirmBook(bookingId);
                 return ResponseEntity.ok(paymentDetails);
         }
@@ -43,7 +39,7 @@ public class PaymentController {
                 @ApiResponse(description = "No bookings found", responseCode = "204")
         })
         @DeleteMapping("/deleteMyBooking")
-        public ResponseEntity<?> deleteMyBooking(@RequestParam String bookingId) throws CustomNoHotelFoundException, CustomNoRoomFoundException, CustomNoBookingFoundException {
+        public ResponseEntity<?> deleteMyBooking(@RequestParam String bookingId) {
                 return ResponseEntity.ok(paymentService.deleteBooking(bookingId));
         }
 }

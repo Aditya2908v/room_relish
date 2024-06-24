@@ -1,9 +1,9 @@
 package org.example.roomrelish.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.roomrelish.ExceptionHandler.ResourceNotFoundException;
+
+import org.example.roomrelish.exception.ResourceNotFoundException;
 import org.example.roomrelish.repository.CustomerRepository;
-import org.jetbrains.annotations.TestOnly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@TestOnly
+
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {

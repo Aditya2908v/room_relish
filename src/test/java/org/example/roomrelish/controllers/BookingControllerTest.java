@@ -6,7 +6,7 @@ import com.mongodb.DuplicateKeyException;
 import org.example.roomrelish.ExceptionHandler.*;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.Booking;
-import org.example.roomrelish.services.BookingServiceImpl;
+import org.example.roomrelish.services.booking.BookingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -45,7 +45,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    void testBookingDetails_success() throws CustomDuplicateBookingException, CustomDataAccessException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
+    void testBookingDetails_success() {
         //Arrange
        Booking booking1 = createBookingFixture(bookingDetailsDTO,booking);
         when(bookingServiceImpl.bookRoom(bookingDetailsDTO)).thenReturn(booking);
@@ -79,7 +79,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    void testBookingDetails_NullPointerException() throws CustomDuplicateBookingException, CustomDataAccessException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
+    void testBookingDetails_NullPointerException(){
         String errorMessage = "Null pointer exception occurred";
         when(bookingServiceImpl.bookRoom(null)).thenThrow(new NullPointerException("Null pointer exception occurred"));
 
@@ -91,7 +91,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    void testBookingDetails_IllegalArgumentException() throws CustomDuplicateBookingException, CustomDataAccessException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
+    void testBookingDetails_IllegalArgumentException() {
         String errorMessage = "Hotel or Room not found";
         BookingDetailsDTO bookingDetailsDTO = createBookingDetailsDTO();
         when(bookingServiceImpl.bookRoom(bookingDetailsDTO)).thenThrow(new IllegalArgumentException("Hotel or Room not found"));

@@ -7,10 +7,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.roomrelish.dto.*;
-import org.example.roomrelish.models.GuestReview;
 import org.example.roomrelish.models.Hotel;
-import org.example.roomrelish.models.Room;
-import org.example.roomrelish.services.HotelService;
+import org.example.roomrelish.services.hotel.HotelService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.ResponseEntity;
@@ -87,19 +85,19 @@ public class HotelController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createHotel(@Valid @RequestBody HotelDTO hotelDTO){
-        Hotel hotel = hotelService.createHotel(hotelDTO);
-        return ResponseEntity.ok(hotel);
+    public ResponseEntity<String> createHotel(@Valid @RequestBody HotelDTO hotelDTO){
+        hotelService.createHotel(hotelDTO);
+        return ResponseEntity.ok("Hotel Created Successfully");
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateHotel(@PathVariable String id, @Valid @RequestBody HotelDTO hotelDTO){
-        Hotel hotel = hotelService.updateHotel(id,hotelDTO);
-        return ResponseEntity.ok(hotel);
+    public ResponseEntity<String> updateHotel(@PathVariable String id, @Valid @RequestBody HotelDTO hotelDTO){
+        hotelService.updateHotel(id,hotelDTO);
+        return ResponseEntity.ok("Hotel Updated Successfully");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteHotel(@PathVariable String id){
+    public ResponseEntity<String> deleteHotel(@PathVariable String id){
         hotelService.deleteHotel(id);
         return ResponseEntity.ok("Hotel deleted successfully");
     }
@@ -113,23 +111,16 @@ public class HotelController {
 
     //add review
     @PostMapping("{id}/reviews")
-    public ResponseEntity<?> addReview(@PathVariable String id, @Valid @RequestBody ReviewDTO reviewDTO) {
-        GuestReview guestReview = hotelService.addReview(id, reviewDTO);
-        return ResponseEntity.ok(guestReview);
-    }
-
-    //delete review
-    @DeleteMapping("{hotelId}/reviews/{reviewId}")
-    public ResponseEntity<?> deleteReview(@PathVariable String hotelId, @PathVariable String reviewId) {
-        hotelService.deleteReview(hotelId, reviewId);
-        return ResponseEntity.ok("Review deleted successfully");
+    public ResponseEntity<String> addReview(@PathVariable String id, @Valid @RequestBody ReviewDTO reviewDTO) {
+         hotelService.addReview(id, reviewDTO);
+        return ResponseEntity.ok("review added successfully");
     }
 
     //add room
     @PostMapping("{id}/rooms")
-    public ResponseEntity<?> addRoom(@PathVariable String id, @Valid @RequestBody RoomDTO roomDTO){
-        Room room = hotelService.addRoom(id, roomDTO);
-        return ResponseEntity.ok(room);
+    public ResponseEntity<String> addRoom(@PathVariable String id, @Valid @RequestBody RoomDTO roomDTO){
+        hotelService.addRoom(id, roomDTO);
+        return ResponseEntity.ok("room added successfully");
     }
 
 }

@@ -5,10 +5,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.roomrelish.repository.TokenRepository;
-import org.example.roomrelish.services.JwtService;
+import org.example.roomrelish.services.authentication.JwtService;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,9 +31,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final TokenRepository tokenRepository;
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain
+    protected void doFilterInternal(@NotNull HttpServletRequest request,
+                                    @NotNull HttpServletResponse response,
+                                    @NotNull FilterChain filterChain
     ) throws ServletException, IOException {
         final String authenticationHeader = request.getHeader("Authorization");
         final String jwtToken;
