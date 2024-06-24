@@ -1,12 +1,17 @@
 package org.example.roomrelish.services.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.example.roomrelish.exception.ResourceNotFoundException;
 import org.example.roomrelish.models.*;
 import org.example.roomrelish.repository.BookingRepository;
+import org.example.roomrelish.repository.CustomerRepository;
 import org.example.roomrelish.repository.HotelRepository;
 import org.example.roomrelish.repository.PaymentRepository;
+import org.example.roomrelish.services.email.EmailService;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,39 +23,37 @@ public class PaymentServiceImpl implements PaymentService {
     private final BookingRepository bookingRepository;
     private final PaymentRepository paymentRepository;
     private final HotelRepository hotelRepository;
+    private final EmailService emailService;
+    private final CustomerRepository customerRepository;
 
     @Override
     public Payment confirmBook(String bookingId) {
         // Setting payment status to true
         Payment currentPayment = setPaymentStatus(bookingId);
         //Modification of Room availability
-        Optional<Hotel> hotelOptional = hotelRepository.findById(currentPayment.getHotelId());
+        Hotel currentHotel = hotelRepository.findById(currentPayment.getHotelId())
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel", "hotel id", currentPayment.getHotelId()));
 
-        if (hotelOptional.isEmpty()) {
-            throw new CustomNoHotelFoundException("No hotel found");
-        }
-        Hotel currentHotel = hotelOptional.get();
         Room currentRoom = currentHotel.getRooms().stream()
                 .filter(room -> room.getId().equals(currentPayment.getRoomId()))
-                .findFirst().orElseThrow(() -> new CustomNoRoomFoundException("Room not found"));
+                .findFirst().orElseThrow(() -> new ResourceNotFoundException("Room", "room id", currentPayment.getRoomId()));
 
-        Optional<Booking> booking = bookingRepository.findById(bookingId);
-        if (booking.isEmpty()) {
-            throw new CustomNoBookingFoundException("No booking found");
-        }
-        Booking currentBooking = booking.get();
+        Booking currentBooking = bookingRepository.findById(currentPayment.getBookingId())
+                .orElseThrow(() -> new ResourceNotFoundException("Booking", "booking id", currentPayment.getBookingId()));
+        Customer customer = customerRepository.findById(currentPayment.getUserId())
+                .orElseThrow(()-> new ResourceNotFoundException("Customer", "customer id", currentPayment.getUserId()));
+
 
         modifyRoomCountForConfirmBooking(currentRoom, currentBooking, currentHotel);
+        sendPaymentConfirmationEmail(customer,currentBooking,currentHotel,currentPayment);
 
         return saveBookingAndPayment(currentHotel, currentPayment);
     }
 
-    public Payment setPaymentStatus(String bookingId) throws CustomNoPaymentFoundException {
-        Optional<Payment> paymentOptional = paymentRepository.findByBookingId(bookingId);
-        if (paymentOptional.isEmpty()) {
-            throw new CustomNoPaymentFoundException("No payment details found");
-        }
-        Payment currentPayment = paymentOptional.get();
+    public Payment setPaymentStatus(String bookingId)  {
+        Payment currentPayment = paymentRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking", "booking id", bookingId));
+
         currentPayment.setPaymentStatus(true);
         return currentPayment;
     }
@@ -78,19 +81,18 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<Payment> getMyBookings(String userId) {
-        return paymentRepository.findAllBy_userId(userId);
+        return paymentRepository.findAllByUserId(userId);
     }
 
     @Override
-    public String deleteBooking(String bookingId) throws CustomNoBookingFoundException, CustomNoHotelFoundException, CustomNoRoomFoundException {
+    public String deleteBooking(String bookingId){
         double chargesAmount = 0.0;
-        Optional<Payment> payment = paymentRepository.findByBookingId(bookingId);
-        Optional<Booking> booking = bookingRepository.findById(bookingId);
-        if (payment.isEmpty() || booking.isEmpty()) {
-            throw new CustomNoBookingFoundException("No booking found");
-        }
-        Payment currentPayment = payment.get();
-        Booking currentBooking = booking.get();
+        Payment currentPayment = paymentRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking", "booking id", bookingId));
+
+        Booking currentBooking = bookingRepository.findById(currentPayment.getBookingId())
+                .orElseThrow(() -> new ResourceNotFoundException("Booking", "booking id", currentPayment.getBookingId()));
+
         if (currentPayment.isPaymentStatus()) {
             chargesAmount = paymentStatusTrue(currentPayment,currentBooking,chargesAmount);
             return "Cancelled booking and the amount refunded will be " + (currentBooking.getTotalAmount() - chargesAmount);
@@ -100,13 +102,13 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    public double paymentStatusTrue(Payment currentPayment, Booking currentBooking, Double chargesAmount) throws CustomNoHotelFoundException, CustomNoRoomFoundException {
-        Optional<Hotel> hotel = hotelRepository.findById(currentPayment.getHotelId());
-        Hotel currentHotel = hotel.orElseThrow(() -> new CustomNoHotelFoundException("Hotel not found"));
+    public double paymentStatusTrue(Payment currentPayment, Booking currentBooking, Double chargesAmount)  {
+        Hotel currentHotel = hotelRepository.findById(currentPayment.getHotelId())
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel", "hotel id", currentPayment.getHotelId()));
 
         Room currentRoom = currentHotel.getRooms().stream()
                 .filter(room -> room.getId().equals(currentPayment.getRoomId()))
-                .findFirst().orElseThrow(() -> new CustomNoRoomFoundException("No room found"));
+                .findFirst().orElseThrow(() -> new ResourceNotFoundException("Room", "room id", currentPayment.getRoomId()));
         modifyRoomCountForDeleteBooking(currentBooking, currentRoom, currentHotel);
         hotelRepository.save(currentHotel);
         deleteBookingAndPayment(currentBooking, currentPayment);
@@ -132,7 +134,36 @@ public class PaymentServiceImpl implements PaymentService {
         availabilityList.removeIf(availability -> (currentBooking.getId()).equals(availability.getBookingId()));
         currentRoom.setRoomAvailabilityList(availabilityList);
         currentHotel.setRooms(currentHotel.getRooms());
-        System.out.println();
-        System.out.println();
+    }
+    private void sendPaymentConfirmationEmail(Customer customer,Booking booking, Hotel hotel, Payment payment){
+        String to = customer.getEmail();
+        String subject = "Booking Confirmation - " + hotel.getHotelName();
+        String body = generatePaymentConfirmationBody(customer, booking, hotel, payment);
+        emailService.sendHtmlEmail(to, subject, body);
+    }
+    private String generatePaymentConfirmationBody(Customer customer, Booking booking, Hotel hotel, Payment payment) {
+
+        NumberFormat formatter = new DecimalFormat("#0.00");
+
+        return "<html><body>" +
+                "<h2>Booking Confirmation - " + hotel.getHotelName() + "</h2>" +
+                "<p>Dear " + customer.getUserName() + ",</p>" +
+                "<p>Your have paid for your latest booking at " + hotel.getHotelName() + ".</p>" +
+                "<h3>Payment Details:</h3>"+
+                "<ul>"+
+                "<li><strong>Payment ID:</strong>"+payment.getId()+"</li>"+
+                "<li><strong>Customer Name:</strong>"+customer.getUserName()+"</li?>"+
+                "<li><strong>Total Amount paid (Inclusive GST):</strong>"+payment.getTotalAmount()+"</li>"+
+                "<h3>Booking Details:</h3>" +
+                "<ul>" +
+                "<li><strong>Booking ID:</strong> " + booking.getId() + "</li>" +
+                "<li><strong>Hotel Name:</strong> " + hotel.getHotelName() + "</li>" +
+                "<li><strong>Check-in Date:</strong> " + booking.getCheckInDate() + "</li>" +
+                "<li><strong>Check-out Date:</strong> " + booking.getCheckOutDate() + "</li>" +
+                "<li><strong>Total Amount:</strong> $" + formatter.format(booking.getTotalAmount()) + "</li>" +
+                "</ul>" +
+                "<p>Thank you for choosing " + hotel.getHotelName() + ".</p>" +
+                "<p>Best regards,<br/>Hotel Management Team</p>" +
+                "</body></html>";
     }
 }
