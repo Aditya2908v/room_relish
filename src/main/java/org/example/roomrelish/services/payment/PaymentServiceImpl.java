@@ -25,6 +25,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final HotelRepository hotelRepository;
     private final EmailService emailService;
     private final CustomerRepository customerRepository;
+    
 
     @Override
     public Payment confirmBook(String bookingId) {
@@ -119,7 +120,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (dayDifference == 0) {
             chargesAmount = currentBooking.getTotalAmount();
         } else if (dayDifference == 1) {
-            chargesAmount = (50.0 / 100.0) * currentBooking.getTotalAmount();
+            chargesAmount =  ApplicationConstants.DEFAULT_CANCELLATION_CHARGE * currentBooking.getTotalAmount();
         }
         return chargesAmount;
     }
