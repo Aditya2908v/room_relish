@@ -132,5 +132,6 @@ public class PaymentServiceImpl implements PaymentService {
         availabilityList.removeIf(availability -> (currentBooking.getId()).equals(availability.getBookingId()));
         currentRoom.setRoomAvailabilityList(availabilityList);
         currentHotel.setRooms(currentHotel.getRooms());
+        System.out.println();
     }
 }
