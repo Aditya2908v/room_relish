@@ -24,8 +24,6 @@ public class BookingServiceImpl {
     private final BookingRepository bookingRepository;
     private final PaymentRepository paymentRepository;
 
-
-
     public Booking bookRoom(BookingDetailsDTO bookingDetailsDTO) throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
         if(bookingDetailsDTO==null){
             throw new CustomNoBookingDetailsException("No details provided");

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.roomrelish.dto.*;
 import org.example.roomrelish.models.Hotel;
 import org.example.roomrelish.services.hotel.HotelService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.ResponseEntity;
@@ -70,15 +71,15 @@ public class HotelController {
             }
     )
     @GetMapping("/search")
-    public ResponseEntity<?> searchHotels(
-            @RequestParam String cityName,
-            @RequestParam LocalDate checkInDate,
-            @RequestParam LocalDate checkOutDate,
-            @RequestParam int countOfRooms,
-            @RequestParam int priceRangeMax,
-            @RequestParam int priceRangeMin,
-            @RequestParam double rating,
-            @RequestParam List<String> amenities
+    public ResponseEntity<SearchResultDTO> searchHotels(
+            @RequestParam(required = false) String cityName,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkInDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOutDate,
+            @RequestParam(required = false, defaultValue = "1") int countOfRooms,
+            @RequestParam(required = false, defaultValue = "0") int priceRangeMax,
+            @RequestParam(required = false, defaultValue = "0") int priceRangeMin,
+            @RequestParam(required = false, defaultValue = "0") double rating,
+            @RequestParam(required = false) List<String> amenities
     ){
         SearchResultDTO searchResultDTO = hotelService.findHotels(cityName,checkInDate,checkOutDate,countOfRooms,priceRangeMax,priceRangeMin,rating,amenities);
         return ResponseEntity.ok(searchResultDTO);

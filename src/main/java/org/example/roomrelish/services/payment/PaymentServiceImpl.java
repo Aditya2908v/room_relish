@@ -1,10 +1,6 @@
 package org.example.roomrelish.services.payment;
 
 import lombok.RequiredArgsConstructor;
-import org.example.roomrelish.ExceptionHandler.CustomNoBookingFoundException;
-import org.example.roomrelish.ExceptionHandler.CustomNoHotelFoundException;
-import org.example.roomrelish.ExceptionHandler.CustomNoPaymentFoundException;
-import org.example.roomrelish.ExceptionHandler.CustomNoRoomFoundException;
 import org.example.roomrelish.models.*;
 import org.example.roomrelish.repository.BookingRepository;
 import org.example.roomrelish.repository.HotelRepository;
@@ -24,7 +20,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final HotelRepository hotelRepository;
 
     @Override
-    public Payment confirmBook(String bookingId) throws CustomNoRoomFoundException, CustomNoBookingFoundException, CustomNoHotelFoundException, CustomNoPaymentFoundException {
+    public Payment confirmBook(String bookingId) {
         // Setting payment status to true
         Payment currentPayment = setPaymentStatus(bookingId);
         //Modification of Room availability

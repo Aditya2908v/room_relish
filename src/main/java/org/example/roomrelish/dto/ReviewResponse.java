@@ -12,7 +12,7 @@ import org.example.roomrelish.models.Customer;
 @AllArgsConstructor
 @Builder
 public class ReviewResponse {
-    private Customer user;
+    private String customerName;
     private double guestRating;
     private String comment;
 }

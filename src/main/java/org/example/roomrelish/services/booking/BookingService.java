@@ -1,11 +1,10 @@
 package org.example.roomrelish.services.booking;
 
 import lombok.RequiredArgsConstructor;
-import org.example.roomrelish.ExceptionHandler.CustomNoBookingDetailsException;
-import org.example.roomrelish.ExceptionHandler.ResourceNotFoundException;
-import org.example.roomrelish.ExceptionHandler.RoomUnavailableException;
 import org.example.roomrelish.constants.ApplicationConstants;
 import org.example.roomrelish.dto.BookingDetailsDTO;
+import org.example.roomrelish.exception.ResourceNotFoundException;
+import org.example.roomrelish.exception.RoomUnavailableException;
 import org.example.roomrelish.models.*;
 import org.example.roomrelish.repository.BookingRepository;
 import org.example.roomrelish.repository.CustomerRepository;
@@ -29,9 +28,9 @@ public class BookingService {
     private final CustomerRepository customerRepository;
     private final EmailService emailService;
 
-    public Booking bookRoom(BookingDetailsDTO bookingDetailsDTO) throws CustomNoBookingDetailsException {
+    public Booking bookRoom(BookingDetailsDTO bookingDetailsDTO)  {
         if (bookingDetailsDTO == null)
-            throw new CustomNoBookingDetailsException("No details provided");
+            throw new IllegalArgumentException("No details provided");
 
         Hotel hotel = hotelRepository.findById(bookingDetailsDTO.get_hotelId())
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel", "hotel id", bookingDetailsDTO.get_hotelId()));

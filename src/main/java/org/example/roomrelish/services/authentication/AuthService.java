@@ -1,7 +1,7 @@
 package org.example.roomrelish.services.authentication;
 
 import lombok.RequiredArgsConstructor;
-import org.example.roomrelish.ExceptionHandler.CustomerAlreadyExistsException;
+import org.example.roomrelish.exception.CustomerAlreadyExistsException;
 import org.example.roomrelish.dto.AuthResponse;
 import org.example.roomrelish.dto.LoginRequest;
 import org.example.roomrelish.dto.RegisterRequest;
