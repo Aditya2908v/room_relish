@@ -6,7 +6,6 @@ import com.mongodb.DuplicateKeyException;
 import org.example.roomrelish.ExceptionHandler.*;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.Booking;
-import org.example.roomrelish.services.booking.BookingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
