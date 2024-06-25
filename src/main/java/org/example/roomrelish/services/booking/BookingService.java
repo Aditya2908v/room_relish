@@ -54,7 +54,7 @@ public class BookingService {
         return savedBooking;
     }
 
-    private Payment createPayment(Booking booking, Room requiredRoom, Hotel hotel) {
+    public Payment createPayment(Booking booking, Room requiredRoom, Hotel hotel) {
         return Payment.builder()
                 .bookingId(booking.getId())
                 .userId(booking.getUserId())
@@ -72,7 +72,7 @@ public class BookingService {
                 .build();
     }
 
-    private Booking createBooking(BookingDetailsDTO bookingDetailsDTO, Room requiredRoom) {
+    public Booking createBooking(BookingDetailsDTO bookingDetailsDTO, Room requiredRoom) {
         double totalAmount = bookingDetailsDTO.getCustomerRoomCount() * (double) bookingDetailsDTO.getCustomerDayCount() * requiredRoom.getRoomRate();
         double totalBill = totalAmount + totalAmount * ApplicationConstants.DEFAULT_GST_PERCENTAGE;
         return Booking.builder()
@@ -88,17 +88,17 @@ public class BookingService {
                 .build();
     }
 
-    private void updateRoomCount(Hotel hotel, Room requiredRoom, int customerRoomCount) {
+    public void updateRoomCount(Hotel hotel, Room requiredRoom, int customerRoomCount) {
         requiredRoom.setRoomCount(requiredRoom.getRoomCount() - customerRoomCount);
         hotelRepository.save(hotel);
     }
 
-    private void validateRoomAvailability(int roomCountBasic, int customerRoomCount) {
+    public void validateRoomAvailability(int roomCountBasic, int customerRoomCount) {
         if (roomCountBasic < customerRoomCount)
             throw new RoomUnavailableException("No available rooms");
     }
 
-    private void updateCustomerRecentVisits(Customer customer, Hotel hotel) {
+    public void updateCustomerRecentVisits(Customer customer, Hotel hotel) {
         List<String> recentVisits = customer.getRecentVisitsOfHotels();
         if (recentVisits == null) recentVisits = new ArrayList<>();
         if (!recentVisits.contains(hotel.getId())) {
@@ -108,14 +108,14 @@ public class BookingService {
         }
     }
 
-    private void sendBookingConfirmationEmail(Customer customer,Booking booking, Hotel hotel, Room room){
+    public void sendBookingConfirmationEmail(Customer customer,Booking booking, Hotel hotel, Room room){
         String to = customer.getEmail();
         String subject = "Booking Confirmation - " + hotel.getHotelName();
         String body = generateBookingConfirmationBody(customer, booking, hotel, room);
         emailService.sendHtmlEmail(to, subject, body);
     }
 
-    private String generateBookingConfirmationBody(Customer customer, Booking booking, Hotel hotel, Room room) {
+    public String generateBookingConfirmationBody(Customer customer, Booking booking, Hotel hotel, Room room) {
 
         NumberFormat formatter = new DecimalFormat("#0.00");
 

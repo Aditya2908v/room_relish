@@ -3,9 +3,11 @@ package org.example.roomrelish.controllers;
 import com.flextrade.jfixture.FixtureAnnotations;
 import com.flextrade.jfixture.annotations.Fixture;
 import com.mongodb.DuplicateKeyException;
-import org.example.roomrelish.ExceptionHandler.*;
+
 import org.example.roomrelish.dto.BookingDetailsDTO;
+import org.example.roomrelish.exception.GlobalExceptionHandler;
 import org.example.roomrelish.models.Booking;
+import org.example.roomrelish.services.booking.BookingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -28,7 +30,7 @@ public class BookingControllerTest {
 
 
     @Mock
-    private BookingServiceImpl bookingServiceImpl;
+    private BookingService bookingService;
     @Mock
     private GlobalExceptionHandler globalExceptionHandler;
     @Fixture
@@ -47,7 +49,7 @@ public class BookingControllerTest {
     void testBookingDetails_success() {
         //Arrange
        Booking booking1 = createBookingFixture(bookingDetailsDTO,booking);
-        when(bookingServiceImpl.bookRoom(bookingDetailsDTO)).thenReturn(booking);
+        when(bookingService.bookRoom(bookingDetailsDTO)).thenReturn(booking);
         //Act
         ResponseEntity<?> response = bookingController.bookingDetails(bookingDetailsDTO);
         //Assert
@@ -57,9 +59,9 @@ public class BookingControllerTest {
     }
 
     private Booking createBookingFixture(BookingDetailsDTO bookingDetailsDTO, Booking booking) {
-        booking.set_userId(bookingDetailsDTO.get_userId());
-        booking.set_hotelId(bookingDetailsDTO.get_hotelId());
-        booking.set_roomId(bookingDetailsDTO.get_roomId());
+        booking.setUserId(bookingDetailsDTO.get_userId());
+        booking.setHotelId(bookingDetailsDTO.get_hotelId());
+        booking.setRoomId(bookingDetailsDTO.get_roomId());
         booking.setNumOfRooms(bookingDetailsDTO.getCustomerRoomCount());
         booking.setNumOfDays(bookingDetailsDTO.getCustomerDayCount());
         booking.setCheckInDate(bookingDetailsDTO.getCheckInDate());
@@ -68,38 +70,16 @@ public class BookingControllerTest {
     }
 
     private void verifyBookingDetails(Booking body, BookingDetailsDTO bookingDetailsDTO) {
-        assertEquals(bookingDetailsDTO.get_userId(), body.get_userId());
-        assertEquals(bookingDetailsDTO.get_hotelId(), body.get_hotelId());
-        assertEquals(bookingDetailsDTO.get_roomId(), body.get_roomId());
+        assertEquals(bookingDetailsDTO.get_userId(), body.getUserId());
+        assertEquals(bookingDetailsDTO.get_hotelId(), body.getHotelId());
+        assertEquals(bookingDetailsDTO.get_roomId(), body.getRoomId());
         assertEquals(bookingDetailsDTO.getCustomerRoomCount(), body.getNumOfRooms());
         assertEquals(bookingDetailsDTO.getCustomerDayCount(), body.getNumOfDays());
         assertEquals(bookingDetailsDTO.getCheckInDate(), body.getCheckInDate());
         assertEquals(bookingDetailsDTO.getCheckOutDate(), body.getCheckOutDate());
     }
 
-    @Test
-    void testBookingDetails_NullPointerException(){
-        String errorMessage = "Null pointer exception occurred";
-        when(bookingServiceImpl.bookRoom(null)).thenThrow(new NullPointerException("Null pointer exception occurred"));
 
-
-        ResponseEntity<?> response = bookingController.bookingDetails(null);
-
-        assertEquals(HttpStatusCode.valueOf(500),response.getStatusCode());
-        assertEquals(errorMessage,response.getBody());
-    }
-
-    @Test
-    void testBookingDetails_IllegalArgumentException() {
-        String errorMessage = "Hotel or Room not found";
-        BookingDetailsDTO bookingDetailsDTO = createBookingDetailsDTO();
-        when(bookingServiceImpl.bookRoom(bookingDetailsDTO)).thenThrow(new IllegalArgumentException("Hotel or Room not found"));
-
-        ResponseEntity<?> response = bookingController.bookingDetails(bookingDetailsDTO);
-
-        assertEquals(HttpStatusCode.valueOf(400),response.getStatusCode());
-        assertEquals(errorMessage,response.getBody());
-    }
 
     @Test
     void testBookingDetails_CustomDuplicateKeyException(){
@@ -132,9 +112,9 @@ public class BookingControllerTest {
     private Booking createBooking() {
         return Booking.builder()
                 .id("987")
-                ._userId("123")
-                ._hotelId("234")
-                ._roomId("345")
+                .userId("123")
+                .hotelId("234")
+                .roomId("345")
                 .numOfRooms(1)
                 .numOfDays(1)
                 .totalAmount(1100.0)

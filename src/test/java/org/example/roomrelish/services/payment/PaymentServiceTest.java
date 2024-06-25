@@ -2,11 +2,9 @@ package org.example.roomrelish.services.payment;
 
 import com.flextrade.jfixture.FixtureAnnotations;
 import com.flextrade.jfixture.annotations.Fixture;
-import org.example.roomrelish.ExceptionHandler.CustomNoPaymentFoundException;
 import org.example.roomrelish.models.*;
-import org.example.roomrelish.repository.BookingRepository;
-import org.example.roomrelish.repository.HotelRepository;
-import org.example.roomrelish.repository.PaymentRepository;
+import org.example.roomrelish.repository.*;
+import org.example.roomrelish.services.email.EmailService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,25 +17,38 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
  class PaymentServiceTest {
 
     @Mock
     HotelRepository hotelRepository;
-
-    @Fixture
-    Hotel hotel;
-
-    @Fixture
-    Booking currentBooking;
-
-    @Fixture
-    Room currentRoom;
+    @Mock
+     RoomRepository roomRepository;
+    @Mock
+     CustomerRepository customerRepository;
     @Mock
     private BookingRepository bookingRepository;
     @Mock
     private PaymentRepository paymentRepository;
+    @Mock
+     EmailService emailService;
+     @Fixture
+     Hotel hotel;
+
+     @Fixture
+     Booking currentBooking;
+
+     @Fixture
+     Room currentRoom;
+
+     @Fixture
+     Customer customer;
+
+     @Fixture
+     List<RoomAvailability> roomAvailabilityList;
+
     @InjectMocks
     private PaymentServiceImpl paymentService;
 
@@ -48,9 +59,30 @@ import static org.mockito.Mockito.when;
         MockitoAnnotations.openMocks(this);
     }
 
+    @Test
+    void testConfirmBook_Success(){
+        String bookingId="123";
+        Payment payment = createPayment(bookingId);
+        Hotel hotel = createHotel(payment.getHotelId());
+        customer.setId(payment.getUserId());
+        when(hotelRepository.findById(any())).thenReturn(Optional.of(hotel));
+        when(roomRepository.findById(any())).thenReturn(Optional.of(createRoom(payment.getRoomId())));
+        when(bookingRepository.findById(any())).thenReturn(Optional.of((createBooking(bookingId))));
+        when(paymentRepository.findByBookingId(bookingId)).thenReturn(Optional.of(payment));
+        when(customerRepository.findById(any())).thenReturn(Optional.of(customer));
+        when(paymentService.confirmBook(bookingId)).thenReturn(payment);
+
+
+        Payment actualPayment = paymentService.confirmBook(bookingId);
+
+        Assertions.assertTrue(actualPayment.isPaymentStatus());
+
+    }
+
+
 
      @Test
-     void testSetPaymentStatus_Success() throws CustomNoPaymentFoundException {
+     void testSetPaymentStatus_Success() {
          String bookingId = "123";
          Payment expectedPayment = createPayment(bookingId);
          when(paymentRepository.findByBookingId(bookingId)).thenReturn(Optional.of(expectedPayment));
@@ -78,6 +110,23 @@ import static org.mockito.Mockito.when;
         Payment payment = paymentService.saveBookingAndPayment(hotel,createPayment("123"));
 
         Assertions.assertNotNull(payment);
+    }
+
+    @Test
+    void testDeleteBooking_Success(){
+        String bookingId = "123";
+        Payment payment = createPayment(bookingId);
+        hotel.setId(payment.getHotelId());
+        hotel.getRooms().add(createRoom("345"));
+
+        when(paymentRepository.findByBookingId(any())).thenReturn(Optional.of(payment));
+        when(bookingRepository.findById(any())).thenReturn(Optional.of(createBooking(bookingId)));
+        when(hotelRepository.findById(any())).thenReturn(Optional.of(hotel));
+
+        String result = paymentService.deleteBooking(bookingId);
+
+        Assertions.assertNotNull(result);
+
     }
 
 
@@ -141,13 +190,14 @@ import static org.mockito.Mockito.when;
          hotel.setLocationFeatures(List.of("Nearby attractions", "City center location"));
          hotel.setAmenities(List.of("Free WiFi", "Swimming pool"));
          hotel.setImages(List.of("image1.jpg", "image2.jpg"));
-         hotel.setRooms(List.of(createRoom("123"),createRoom("456")));
+         hotel.setRooms(List.of(createRoom("345"),createRoom("456")));
          return hotel;
      }
 
      private Room createRoom(String roomId) {
          return Room.builder()
                  .id(roomId)
+                 .roomAvailabilityList(roomAvailabilityList)
                  .roomType("Deluxe")
                  .roomSpecification("King size")
                  .roomRate(1200)

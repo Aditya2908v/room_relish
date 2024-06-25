@@ -53,8 +53,8 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     public Payment setPaymentStatus(String bookingId)  {
-        Payment currentPayment = paymentRepository.findById(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Booking", "booking id", bookingId));
+        Payment currentPayment = paymentRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment", "payment id", bookingId));
 
         currentPayment.setPaymentStatus(true);
         return currentPayment;
@@ -89,7 +89,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public String deleteBooking(String bookingId){
         double chargesAmount = 0.0;
-        Payment currentPayment = paymentRepository.findById(bookingId)
+        Payment currentPayment = paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking", "booking id", bookingId));
 
         Booking currentBooking = bookingRepository.findById(currentPayment.getBookingId())
