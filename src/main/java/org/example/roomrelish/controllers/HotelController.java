@@ -105,7 +105,7 @@ public class HotelController {
 
     //Get reviews
     @GetMapping("{id}/reviews")
-    public ResponseEntity<?> getAllReviews(@PathVariable String id){
+    public ResponseEntity<List<ReviewResponse>> getAllReviews(@PathVariable String id){
         List<ReviewResponse> guestReviews = hotelService.getReviews(id);
         return ResponseEntity.ok(guestReviews);
     }

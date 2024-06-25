@@ -1,5 +1,6 @@
 package org.example.roomrelish.services.hotel;
 
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.example.roomrelish.exception.ResourceNotFoundException;
@@ -193,19 +194,15 @@ public class HotelServiceImpl implements HotelService {
 
     private List<Hotel> filteringHotelsByRating(List<Hotel> filteredHotels, double rating) {
         if (rating > 0) {
-            System.out.println("Inside rating filter");
             filteredHotels = filteredHotels.stream().filter(hotel -> hotel.getRating() > rating).collect(Collectors.toList());
         }
-        System.out.println(filteredHotels.size());
         return filteredHotels;
     }
 
     private List<Hotel> filteringHotelsByAmenities(List<Hotel> filteredHotels, List<String> amenities) {
-        System.out.println("Inside amenities filter");
         if (amenities != null) {
             filteredHotels = filteredHotels.stream().filter(hotel -> new HashSet<>(hotel.getAmenities()).containsAll(amenities)).toList();
         }
-        System.out.println(filteredHotels.size());
         return filteredHotels;
     }
 

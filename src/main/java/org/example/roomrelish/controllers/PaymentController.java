@@ -8,6 +8,8 @@ import org.example.roomrelish.services.payment.PaymentServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/payment")
 @RequiredArgsConstructor
@@ -20,7 +22,7 @@ public class PaymentController {
                 @ApiResponse(description = "No booking details found", responseCode = "204")
         })
         @PostMapping("/pay")
-        public ResponseEntity<?> confirmBooking(@RequestParam String bookingId){
+        public ResponseEntity<Payment> confirmBooking(@RequestParam String bookingId){
                 Payment paymentDetails = paymentService.confirmBook(bookingId);
                 return ResponseEntity.ok(paymentDetails);
         }
@@ -30,7 +32,7 @@ public class PaymentController {
                 @ApiResponse(description = "No bookings found", responseCode = "204")
         })
         @GetMapping("/myBookings")
-        public ResponseEntity<?> myBookings(@RequestParam String userId) {
+        public ResponseEntity<List<Payment>> myBookings(@RequestParam String userId) {
                 return ResponseEntity.ok(paymentService.getMyBookings(userId));
         }
 
@@ -39,7 +41,7 @@ public class PaymentController {
                 @ApiResponse(description = "No bookings found", responseCode = "204")
         })
         @DeleteMapping("/deleteMyBooking")
-        public ResponseEntity<?> deleteMyBooking(@RequestParam String bookingId) {
+        public ResponseEntity<String> deleteMyBooking(@RequestParam String bookingId) {
                 return ResponseEntity.ok(paymentService.deleteBooking(bookingId));
         }
 }
