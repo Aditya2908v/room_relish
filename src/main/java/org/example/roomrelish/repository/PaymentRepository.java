@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 @Repository
 public interface PaymentRepository extends CrudRepository<Payment, String> {
-    List<Payment> findAllByUserId(String _userId);
+    List<Payment> findAllByUserId(String userId);
 
     Optional<Payment> findByBookingId(String bookingId);
 }
