@@ -8,9 +8,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
-import org.jetbrains.annotations.TestOnly;
 
-@TestOnly
 @OpenAPIDefinition(
         info = @Info(
                 title = "Room Relish Api",
@@ -23,7 +21,7 @@ import org.jetbrains.annotations.TestOnly;
         ),
         servers = {
                 @Server(
-                        url = "http://localhost:8082",
+                        url = "http://localhost:8081",
                         description = "Local Development Server"
                 )
         },

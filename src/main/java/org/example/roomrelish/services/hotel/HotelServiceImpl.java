@@ -1,19 +1,20 @@
 package org.example.roomrelish.services.hotel;
 
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.example.roomrelish.exception.ResourceNotFoundException;
 import org.example.roomrelish.dto.*;
+import org.example.roomrelish.exception.ResourceNotFoundException;
 import org.example.roomrelish.models.*;
 import org.example.roomrelish.repository.CustomerRepository;
 import org.example.roomrelish.repository.HotelRepository;
-import org.example.roomrelish.repository.RoomRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,7 +23,6 @@ public class HotelServiceImpl implements HotelService {
 
     private final HotelRepository hotelRepository;
     private final CustomerRepository customerRepository;
-    private final RoomRepository roomRepository;
     String hotelErrorMessage = "Hotel not found";
 
     @Override

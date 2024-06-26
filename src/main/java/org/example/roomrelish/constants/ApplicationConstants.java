@@ -7,4 +7,5 @@ public class ApplicationConstants {
     public static final double DEFAULT_GST_PERCENTAGE = 0.12;
 
     public static final double DEFAULT_CANCELLATION_CHARGE=0.5;
+
 }

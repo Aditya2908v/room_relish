@@ -1,12 +1,10 @@
 package org.example.roomrelish.services.booking;
 
-
-import com.flextrade.jfixture.FixtureAnnotations;
-import com.flextrade.jfixture.annotations.Fixture;
+import org.example.roomrelish.ExceptionHandler.*;
 import org.example.roomrelish.dto.BookingDetailsDTO;
 import org.example.roomrelish.models.*;
-import org.example.roomrelish.repository.*;
-import org.example.roomrelish.services.email.EmailService;
+import org.example.roomrelish.repository.BookingRepository;
+import org.example.roomrelish.repository.HotelRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -17,8 +15,6 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 public class BookingServiceImplTest {
@@ -31,65 +27,20 @@ public class BookingServiceImplTest {
 
     @Mock
     private BookingRepository bookingRepository;
-    @Mock
-    private CustomerRepository customerRepository;
 
     @Mock
-    private RoomRepository roomRepository;
-
-    @Mock
-    private PaymentRepository paymentRepository;
+    private BookingService bookingServiceImpl;
 
     @InjectMocks
     private BookingService bookingService;
 
-    @Fixture
-    BookingDetailsDTO bookingDetailsDTO;
-    @Fixture
-    Hotel hotel;
-    @Fixture
-    Customer customer;
-    @Fixture
-    Room room;
-
-    @Fixture
-    Payment payment;
-
-    @Mock
-    EmailService emailService;
-
     @BeforeEach
     public void setUp() {
-        FixtureAnnotations.initFixtures(this);
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testBookRoom_Success(){
-        bookingDetailsDTO.setCustomerRoomCount(1);
-        Booking booking = createBooking(bookingDetailsDTO);
-
-        hotel.setId(bookingDetailsDTO.get_hotelId());
-        room.setId(bookingDetailsDTO.get_roomId());
-        room.setRoomCount(5);
-        hotel.getRooms().add(room);
-        customer.setId(bookingDetailsDTO.get_userId());
-        when(hotelRepository.findById(any())).thenReturn(Optional.of(hotel));
-        when(customerRepository.findById(any())).thenReturn(Optional.of(customer));
-        when(roomRepository.findById(any())).thenReturn(Optional.of(room));
-        when(bookingRepository.save(any())).thenReturn(booking);
-        when(paymentRepository.save(any())).thenReturn(payment);
-
-
-        Booking actualBooking = bookingService.bookRoom(bookingDetailsDTO);
-
-        assertNotNull(actualBooking);
-
-
-    }
-
-    @Test
-    public void testValidateRoomAvailability_success(){
+    public void validateRoomAvailability_success(){
         //Arrange
         int roomCount = 7;
         int customerRoomCount = 2;
@@ -97,25 +48,87 @@ public class BookingServiceImplTest {
         bookingService.validateRoomAvailability(roomCount,customerRoomCount);
     }
 
+    @Test
+    public void validateRoomAvailability_IllegalArgException(){
+        int roomCount = 1;
+        int customerRoomCount = 3;
+        String errorMessage = "No available rooms";
 
-
-
-    private void verifyBooking(Booking booking, Booking booking1) {
-        assertEquals(booking.getHotelId(),booking1.getHotelId());
-        assertEquals(booking.getUserId(),booking1.getUserId());
-        assertEquals(booking.getHotelId(),booking1.getHotelId());
+        try{
+            bookingService.validateRoomAvailability(roomCount,customerRoomCount);
+            fail("Expected an exception but none thrown");
+        }
+        catch(IllegalArgumentException e){
+            assertEquals(errorMessage, e.getMessage());
+        }
     }
 
+    @Test
+    public void createBooking_success(){
+        BookingDetailsDTO bookingDetailsDTO = createBookingDetailsDTO();
+        Room room = createRoom();
+        Booking booking = createBooking();
+        when(bookingServiceImpl.createBooking(bookingDetailsDTO,room)).thenReturn(booking);
 
+        Booking booking1 = bookingServiceImpl.createBooking(bookingDetailsDTO,room);
+
+        verifyBooking(booking,booking1);
+    }
+
+    private void verifyBooking(Booking booking, Booking booking1) {
+        assertEquals(booking.get_hotelId(),booking1.get_hotelId());
+        assertEquals(booking.get_userId(),booking1.get_userId());
+        assertEquals(booking.get_hotelId(),booking1.get_hotelId());
+    }
+
+    @Test
+    public void createPayment_success(){
+        Booking booking = createBooking();
+        Room room = createRoom();
+        Hotel hotel = createSampleHotel();
+        Payment payment = createPayment();
+        when(bookingServiceImpl.createPayment(booking,room,hotel)).thenReturn(payment);
+
+        Payment payment1 = bookingService.createPayment(booking,room,hotel);
+
+        verifyPayment(payment,payment1);
+    }
 
     private void verifyPayment(Payment payment,Payment payment1){
-        assertEquals(payment.getUserId(),payment1.getUserId());
-        assertEquals(payment.getHotelId(),payment1.getHotelId());
-        assertEquals(payment.getRoomId(),payment1.getRoomId());
+        assertEquals(payment.get_userId(),payment1.get_userId());
+        assertEquals(payment.get_hotelId(),payment1.get_hotelId());
+        assertEquals(payment.get_roomId(),payment1.get_roomId());
         assertFalse(payment1.isPaymentStatus());
     }
 
+    @Test
+    public void bookRoom_NullPointException() throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
+        String errorMessage = "No details provided";
+        when(bookingServiceImpl.bookRoom(null)).thenThrow(new NullPointerException("No details provided"));
 
+        try{
+            bookingService.bookRoom(null);
+            fail("Expected an exception but none thrown");
+        }
+        catch(NullPointerException | CustomNoHotelFoundException e){
+            assertEquals(errorMessage, e.getMessage());
+        }
+    }
+
+    @Test
+    public void bookRoom_HotelIllegalArgException() throws CustomDataAccessException, CustomDuplicateBookingException, CustomMongoSocketException, CustomNoBookingDetailsException, CustomNoHotelFoundException {
+        String errorMessage = "Hotel Not Found";
+        BookingDetailsDTO bookingDetailsDTO = createBookingDetailsDTO();
+        when(bookingServiceImpl.bookRoom(bookingDetailsDTO)).thenThrow(new IllegalArgumentException("Hotel Not Found"));
+
+        try{
+            bookingService.bookRoom(bookingDetailsDTO);
+            fail("Expected an exception but none thrown");
+        }
+        catch(IllegalArgumentException | CustomNoBookingDetailsException e){
+            assertEquals(errorMessage, e.getMessage());
+        }
+    }
 
 
 
@@ -123,10 +136,10 @@ public class BookingServiceImplTest {
     private Payment createPayment(){
         return Payment.builder()
                 .id("123")
-                .bookingId("987")
-                .hotelId("234")
-                .roomId("345")
-                .userId("123")
+                ._bookingId("987")
+                ._hotelId("234")
+                ._roomId("345")
+                ._userId("123")
                 .numOfRooms(1)
                 .numOfDays(1)
                 .totalAmount(1100.0)
@@ -157,21 +170,21 @@ public class BookingServiceImplTest {
                 .roomType("Deluxe")
                 .roomSpecification("King size")
                 .roomRate(1200)
-                .roomCount(3).build();
+                .roomCountBasic(3).build();
     }
 
-    private Booking createBooking(BookingDetailsDTO bookingDetailsDTO) {
+    private Booking createBooking() {
         return Booking.builder()
                 .id("987")
-                .userId(bookingDetailsDTO.get_userId())
-                .hotelId(bookingDetailsDTO.get_hotelId())
-                .roomId(bookingDetailsDTO.get_roomId())
-                .numOfRooms(bookingDetailsDTO.getCustomerRoomCount())
-                .numOfDays(bookingDetailsDTO.getCustomerDayCount())
+                ._userId("123")
+                ._hotelId("234")
+                ._roomId("345")
+                .numOfRooms(1)
+                .numOfDays(1)
                 .totalAmount(1100.0)
                 .gstOfTotalAmount(200.0)
-                .checkInDate(bookingDetailsDTO.getCheckInDate())
-                .checkOutDate(bookingDetailsDTO.getCheckOutDate())
+                .checkInDate(createDate(27))
+                .checkOutDate(createDate(28))
                 .build();
     }
     private BookingDetailsDTO createBookingDetailsDTO() {

@@ -1,7 +1,6 @@
 package org.example.roomrelish.config;
 
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.TestOnly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,7 +20,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-@TestOnly
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -44,38 +42,39 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults());
-           http.csrf(AbstractHttpConfigurer::disable);
-            http.authorizeHttpRequests(auth->auth.requestMatchers(HttpMethod.POST,"/api/v1/customer/register").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/customer/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/customer/hello").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.POST,"/api/v1/customer/addCard").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/customer/customers").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/customer/customers").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/customer/navbar").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/customer/profile-details").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/customer/favouriteHotels").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/customer/recent").hasAuthority("USER")
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, "/api/v1/customer/register").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/customer/login").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/customer/hello").hasAuthority("USER")
+                .requestMatchers(HttpMethod.POST, "/api/v1/customer/addCard").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/customer/customers").hasAuthority("USER")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/customer/customers").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/customer/navbar").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/customer/profile-details").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/customer/favouriteHotels").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/customer/recent").hasAuthority("USER")
 
-                        //Hotel Controller
-                        .requestMatchers(HttpMethod.GET, "/api/v1/hotel/search").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/hotel/hello").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/hotel/totalRooms").permitAll()
+                //Hotel Controller
+                .requestMatchers(HttpMethod.GET, "/api/v1/hotels/search").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/hotels").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/hotels/totalRooms").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/hotels/search/**").hasAuthority("USER")
 
-                        //graphql
-                        .requestMatchers("/graphql").permitAll()
-                        .requestMatchers("/graphiql").permitAll()
+                //graphql
+                .requestMatchers("/graphql").permitAll()
+                .requestMatchers("/graphiql").permitAll()
 
-                        //for swagger ui
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/swagger-resources/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
-                        //Booking Controller
-                        .requestMatchers(HttpMethod.POST,"/api/v1/booking/bookingDetails").hasAuthority("USER")
-                        //Payment Controller
-                        .requestMatchers(HttpMethod.POST,"api/v1/payment/pay").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET,"api/v1/payment/myBookings").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.DELETE,"api/v1/payment/deleteMyBooking").hasAuthority("USER")
-                        .anyRequest().authenticated());
+                //for swagger ui
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-resources/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                //Booking Controller
+                .requestMatchers(HttpMethod.POST, "/api/v1/booking/bookingDetails").hasAuthority("USER")
+                //Payment Controller
+                .requestMatchers(HttpMethod.POST, "api/v1/payment/pay").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "api/v1/payment/myBookings").hasAuthority("USER")
+                .requestMatchers(HttpMethod.DELETE, "api/v1/payment/deleteMyBooking").hasAuthority("USER")
+                .anyRequest().authenticated());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -83,7 +82,7 @@ public class SecurityConfig {
                         .addLogoutHandler(logoutHandler)
                         .logoutSuccessHandler((
                                 (request, response, authentication) -> SecurityContextHolder.clearContext()
-                                ))
+                        ))
                 );
         return http.build();
     }
