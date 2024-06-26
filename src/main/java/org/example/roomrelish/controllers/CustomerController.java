@@ -149,7 +149,6 @@ public class CustomerController {
         return ResponseEntity.ok().body(recentHotels);
     }
 
-    //Util function
     public String extractUserEmailFromRequest(HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

@@ -69,7 +69,6 @@ type Query {
     #hotel queries
     hotels: [Hotel!]!
     hotel(id: ID!): Hotel
-    search(cityName : String!):[Hotel!]!
     #user queries
     users:[User!]!
     user(id:ID!): User

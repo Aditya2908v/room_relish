@@ -26,12 +26,7 @@ public class HotelController {
 
     private final HotelService hotelService;
 
-    @GetMapping("/hello")
-    public String hello(){
-        return "Hello World";
-    }
-
-    //GraphQL endpoints
+    // GraphQL endpoints
     @QueryMapping("hotels")
     public List<Hotel> getAllHotelsGraphQL(){
         return hotelService.getAllHotels();
@@ -47,11 +42,12 @@ public class HotelController {
         return hotelService.getAllHotels();
     }
 
-    @GetMapping("/hotels/{id}")
-    public Hotel getHotel(@PathVariable String id){
+    @GetMapping("/hotel")
+    public Hotel getHotel(@RequestParam String id){
         return hotelService.findHotelById(id);
     }
-    //search hotel
+
+    // Search hotel
     @Operation(
             description = "Search Hotels",
             summary = "Search hotels by city name and/or rating",
@@ -81,47 +77,46 @@ public class HotelController {
             @RequestParam(required = false, defaultValue = "0") double rating,
             @RequestParam(required = false) List<String> amenities
     ){
-        SearchResultDTO searchResultDTO = hotelService.findHotels(cityName,checkInDate,checkOutDate,countOfRooms,priceRangeMax,priceRangeMin,rating,amenities);
+        SearchResultDTO searchResultDTO = hotelService.findHotels(cityName, checkInDate, checkOutDate, countOfRooms, priceRangeMax, priceRangeMin, rating, amenities);
         return ResponseEntity.ok(searchResultDTO);
     }
 
-    @PostMapping
+    @PostMapping("/createHotel")
     public ResponseEntity<String> createHotel(@Valid @RequestBody HotelDTO hotelDTO){
         hotelService.createHotel(hotelDTO);
         return ResponseEntity.ok("Hotel Created Successfully");
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateHotel(@PathVariable String id, @Valid @RequestBody HotelDTO hotelDTO){
-        hotelService.updateHotel(id,hotelDTO);
+    @PutMapping("/updateHotel")
+    public ResponseEntity<String> updateHotel(@RequestParam String id, @Valid @RequestBody HotelDTO hotelDTO){
+        hotelService.updateHotel(id, hotelDTO);
         return ResponseEntity.ok("Hotel Updated Successfully");
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteHotel(@PathVariable String id){
+    @DeleteMapping("/deleteHotel")
+    public ResponseEntity<String> deleteHotel(@RequestParam String id){
         hotelService.deleteHotel(id);
         return ResponseEntity.ok("Hotel deleted successfully");
     }
 
-    //Get reviews
-    @GetMapping("{id}/reviews")
-    public ResponseEntity<List<ReviewResponse>> getAllReviews(@PathVariable String id){
+    // Get reviews
+    @GetMapping("/reviews")
+    public ResponseEntity<List<ReviewResponse>> getAllReviews(@RequestParam String id){
         List<ReviewResponse> guestReviews = hotelService.getReviews(id);
         return ResponseEntity.ok(guestReviews);
     }
 
-    //add review
-    @PostMapping("{id}/reviews")
-    public ResponseEntity<String> addReview(@PathVariable String id, @Valid @RequestBody ReviewDTO reviewDTO) {
-         hotelService.addReview(id, reviewDTO);
-        return ResponseEntity.ok("review added successfully");
+    // Add review
+    @PostMapping("/addReview")
+    public ResponseEntity<String> addReview(@RequestParam String id, @Valid @RequestBody ReviewDTO reviewDTO) {
+        hotelService.addReview(id, reviewDTO);
+        return ResponseEntity.ok("Review added successfully");
     }
 
-    //add room
-    @PostMapping("{id}/rooms")
-    public ResponseEntity<String> addRoom(@PathVariable String id, @Valid @RequestBody RoomDTO roomDTO){
+    // Add room
+    @PostMapping("/addRoom")
+    public ResponseEntity<String> addRoom(@RequestParam String id, @Valid @RequestBody RoomDTO roomDTO){
         hotelService.addRoom(id, roomDTO);
-        return ResponseEntity.ok("room added successfully");
+        return ResponseEntity.ok("Room added successfully");
     }
-
 }

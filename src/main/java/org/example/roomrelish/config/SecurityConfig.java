@@ -28,7 +28,7 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
 
-   @Bean
+    @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1"));
@@ -48,17 +48,24 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/customer/hello").hasAuthority("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/customer/addCard").hasAuthority("USER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/customer/customers").hasAuthority("USER")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/customer/customers").hasAuthority("USER")
-                .requestMatchers(HttpMethod.GET, "/api/v1/customer/navbar").hasAuthority("USER")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/customer/update").hasAuthority("USER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/customer/profile-details").hasAuthority("USER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/customer/favouriteHotels").hasAuthority("USER")
+                .requestMatchers(HttpMethod.POST, "/api/v1/customer/favouriteHotels/add").hasAuthority("USER")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/customer/favouriteHotels/delete").hasAuthority("USER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/customer/recent").hasAuthority("USER")
 
                 //Hotel Controller
-                .requestMatchers(HttpMethod.GET, "/api/v1/hotels/search").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/hotels").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/hotels/totalRooms").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/hotels/search/**").hasAuthority("USER")
+                .requestMatchers(HttpMethod.POST, "/api/v1/hotel/createHotel").hasAuthority("USER")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/hotel/updateHotel").hasAuthority("USER")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/hotel/deleteHotel").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/hotel/hello").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/hotel/hotels").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/hotel/hotel").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/hotel/search").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/hotel/reviews").hasAuthority("USER")
+                .requestMatchers(HttpMethod.POST, "/api/v1/hotel/addReview").hasAuthority("USER")
+                .requestMatchers(HttpMethod.POST, "/api/v1/hotel/addRoom").hasAuthority("USER")
 
                 //graphql
                 .requestMatchers("/graphql").permitAll()
@@ -68,6 +75,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/swagger-resources/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
+
                 //Booking Controller
                 .requestMatchers(HttpMethod.POST, "/api/v1/booking/bookingDetails").hasAuthority("USER")
                 //Payment Controller
