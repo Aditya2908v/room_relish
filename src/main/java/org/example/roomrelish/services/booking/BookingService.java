@@ -20,7 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class BookingService {
+public class BookingService implements BookingInterface {
 
     private final HotelRepository hotelRepository;
     private final BookingRepository bookingRepository;
