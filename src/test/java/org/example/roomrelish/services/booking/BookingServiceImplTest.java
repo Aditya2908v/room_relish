@@ -27,9 +27,6 @@ public class BookingServiceImplTest {
     private HotelRepository hotelRepository;
 
     @Mock
-    private BookingDetailsDTO bookingDetailsDTOMock;
-
-    @Mock
     private BookingRepository bookingRepository;
     @Mock
     private CustomerRepository customerRepository;
@@ -89,37 +86,13 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testValidateRoomAvailability_success(){
+     void testValidateRoomAvailability_success(){
         //Arrange
         int roomCount = 7;
         int customerRoomCount = 2;
         //Act
         bookingService.validateRoomAvailability(roomCount,customerRoomCount);
     }
-
-
-
-
-    private void verifyBooking(Booking booking, Booking booking1) {
-        assertEquals(booking.getHotelId(),booking1.getHotelId());
-        assertEquals(booking.getUserId(),booking1.getUserId());
-        assertEquals(booking.getHotelId(),booking1.getHotelId());
-    }
-
-
-
-    private void verifyPayment(Payment payment,Payment payment1){
-        assertEquals(payment.getUserId(),payment1.getUserId());
-        assertEquals(payment.getHotelId(),payment1.getHotelId());
-        assertEquals(payment.getRoomId(),payment1.getRoomId());
-        assertFalse(payment1.isPaymentStatus());
-    }
-
-
-
-
-
-
     private Payment createPayment(){
         return Payment.builder()
                 .id("123")

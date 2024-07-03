@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @TestOnly
 @Data
@@ -33,4 +34,5 @@ public class Payment {
     private boolean paymentStatus;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
+    private LocalDateTime bookingConfirmedDateTime;
 }

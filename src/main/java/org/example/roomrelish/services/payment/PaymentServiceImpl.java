@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +27,15 @@ public class PaymentServiceImpl implements PaymentService {
     private final HotelRepository hotelRepository;
     private final EmailService emailService;
     private final CustomerRepository customerRepository;
+    Logger logger = Logger.getLogger(getClass().getName());
+
     
 
     @Override
     public Payment confirmBook(String bookingId) {
         // Setting payment status to true
         Payment currentPayment = setPaymentStatus(bookingId);
+
         //Modification of Room availability
         Hotel currentHotel = hotelRepository.findById(currentPayment.getHotelId())
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel", "hotel id", currentPayment.getHotelId()));
@@ -52,9 +57,10 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     public Payment setPaymentStatus(String bookingId)  {
+        logger.info("Payment Status setting");
         Payment currentPayment = paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment", "payment id", bookingId));
-
+        currentPayment.setBookingConfirmedDateTime(LocalDateTime.now());
         currentPayment.setPaymentStatus(true);
         return currentPayment;
     }
@@ -95,9 +101,11 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Booking", "booking id", currentPayment.getBookingId()));
 
         if (currentPayment.isPaymentStatus()) {
+            logger.info("Payment Status is true");
             chargesAmount = paymentStatusTrue(currentPayment,currentBooking,chargesAmount);
             return "Cancelled booking and the amount refunded will be " + (currentBooking.getTotalAmount() - chargesAmount);
         } else {
+            logger.info("Payment Status is false");
             deleteBookingAndPayment(currentBooking, currentPayment);
             return "Booking details deleted";
         }
@@ -122,6 +130,7 @@ public class PaymentServiceImpl implements PaymentService {
         } else if (dayDifference == 1) {
             chargesAmount =  ApplicationConstants.DEFAULT_CANCELLATION_CHARGE * currentBooking.getTotalAmount();
         }
+
         return chargesAmount;
     }
 
@@ -141,6 +150,7 @@ public class PaymentServiceImpl implements PaymentService {
         String subject = "Booking Confirmation - " + hotel.getHotelName();
         String body = generatePaymentConfirmationBody(customer, booking, hotel, payment);
         emailService.sendHtmlEmail(to, subject, body);
+        logger.info("Payment confirmation email is sent");
     }
     private String generatePaymentConfirmationBody(Customer customer, Booking booking, Hotel hotel, Payment payment) {
 

@@ -17,10 +17,13 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
 public class BookingService implements BookingInterface {
+    Logger logger = Logger.getLogger(getClass().getName());
+
 
     private final HotelRepository hotelRepository;
     private final BookingRepository bookingRepository;
@@ -43,10 +46,13 @@ public class BookingService implements BookingInterface {
                 .orElseThrow(() -> new ResourceNotFoundException("Room", "room id", bookingDetailsDTO.get_roomId()));
 
         validateRoomAvailability(requiredRoom.getRoomCount(), bookingDetailsDTO.getCustomerRoomCount());
+
         updateCustomerRecentVisits(customer, hotel);
-        updateRoomCount(hotel, requiredRoom, bookingDetailsDTO.getCustomerRoomCount());
+
         Booking booking = createBooking(bookingDetailsDTO, requiredRoom);
+
         Booking savedBooking = bookingRepository.save(booking);
+
         Payment payment = createPayment(savedBooking, requiredRoom, hotel);
         paymentRepository.save(payment);
         //send booking confirmation email to customer
@@ -88,17 +94,14 @@ public class BookingService implements BookingInterface {
                 .build();
     }
 
-    public void updateRoomCount(Hotel hotel, Room requiredRoom, int customerRoomCount) {
-        requiredRoom.setRoomCount(requiredRoom.getRoomCount() - customerRoomCount);
-        hotelRepository.save(hotel);
-    }
-
     public void validateRoomAvailability(int roomCountBasic, int customerRoomCount) {
+        logger.info("Validating whether room is available or not");
         if (roomCountBasic < customerRoomCount)
             throw new RoomUnavailableException("No available rooms");
     }
 
     public void updateCustomerRecentVisits(Customer customer, Hotel hotel) {
+        logger.info("Updating the booking in Customer's recent visit list");
         List<String> recentVisits = customer.getRecentVisitsOfHotels();
         if (recentVisits == null) recentVisits = new ArrayList<>();
         if (!recentVisits.contains(hotel.getId())) {
@@ -113,6 +116,7 @@ public class BookingService implements BookingInterface {
         String subject = "Booking Confirmation - " + hotel.getHotelName();
         String body = generateBookingConfirmationBody(customer, booking, hotel, room);
         emailService.sendHtmlEmail(to, subject, body);
+        logger.info("Booking confirmation mail sent");
     }
 
     public String generateBookingConfirmationBody(Customer customer, Booking booking, Hotel hotel, Room room) {

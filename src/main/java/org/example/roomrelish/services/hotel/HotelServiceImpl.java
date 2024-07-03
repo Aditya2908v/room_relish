@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +25,9 @@ public class HotelServiceImpl implements HotelService {
     private final HotelRepository hotelRepository;
     private final CustomerRepository customerRepository;
     String hotelErrorMessage = "Hotel not found";
+
+    Logger logger = Logger.getLogger(getClass().getName());
+
 
     @Override
     public List<Hotel> getAllHotels() {
@@ -139,6 +143,7 @@ public class HotelServiceImpl implements HotelService {
                                       double rating,
                                       List<String> amenities) {
         try {
+            logger.config("Inside search");
             List<Hotel> filteredHotels = hotelRepository.findByLocationCityName(cityName);
             filteredHotels = filteringHotelsByAmenities(filteredHotels, amenities);
 
