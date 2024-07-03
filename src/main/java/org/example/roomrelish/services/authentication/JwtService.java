@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-@TestOnly
 public class JwtService {
 
     // Secret key used for signing and validating JWT tokens

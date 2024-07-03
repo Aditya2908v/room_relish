@@ -19,7 +19,7 @@ type Hotel {
 type Location {
     cityName: String!
     latitude: Float!
-    longitude: Float!
+    WSAa: Float!
     address: String!
 }
 
@@ -42,7 +42,7 @@ type GuestReview {
 
 type User {
     id: String
-    userName: String
+    username: String
     email: String
     googleId: String
     favouriteHotels: [String!]!

@@ -62,7 +62,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/hotel/hello").hasAuthority("USER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/hotel/hotels").hasAuthority("USER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/hotel/hotel").hasAuthority("USER")
-                .requestMatchers(HttpMethod.GET, "/api/v1/hotel/search").hasAuthority("USER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/hotel/search").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/hotel/reviews").hasAuthority("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/hotel/addReview").hasAuthority("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/hotel/addRoom").hasAuthority("USER")
